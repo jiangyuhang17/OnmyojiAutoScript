@@ -31,7 +31,17 @@ class HyaDevice(BaseTask):
     def fast_screenshot(self, screenshot: ScreenshotMethod):
         self.hya_screenshot_interval.wait()
         self.hya_screenshot_interval.reset()
-        self.device.image = self.device.screenshot_window_background() if screenshot == ScreenshotMethod.WINDOW_BACKGROUND else self.device.screenshot_nemu_ipc()
+        if screenshot == ScreenshotMethod.WINDOW_BACKGROUND:
+            try:
+                self.device.image = self.device.screenshot_window_background()
+            except IndexError:
+                logger.warning('Emulator render window not found, fallback to Nemu IPC screenshot')
+                self.device.image = self.device.screenshot_nemu_ipc()
+            if image_black(self.device.image):
+                logger.warning('Window background screenshot is black, fallback to Nemu IPC screenshot')
+                self.device.image = self.device.screenshot_nemu_ipc()
+        else:
+            self.device.image = self.device.screenshot_nemu_ipc()
         if image_black(self.device.image):
             logger.error('Screenshot image is black, try again')
             raise RequestHumanTakeover('Screenshot image is black, try again')
@@ -78,4 +88,3 @@ if __name__ == '__main__':
     # print(f"执行总的时间: {execution_time * 1000} ms")
 
     hd.fast_screenshot()
-

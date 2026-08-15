@@ -14,6 +14,7 @@ from oashya.labels import id2label, id2name
 from module.logger import logger
 from tasks.Hyakkiyakou.agent.focus import Focus
 from tasks.Hyakkiyakou.debugger import Debugger
+from tasks.Hyakkiyakou.slave.hya_slave import HyaBuff
 
 
 def generate_gaussian_patch(size=(300, 300), mean=0, std_dev=60):
@@ -56,6 +57,11 @@ def embed_patch_in_canvas(canvas, patch, position=(0, 0), patch_size=(300, 300))
 class Agent:
     GAUSSIAN = generate_gaussian_patch()
     OBSERVE_THRESHOLD = 0.6
+    NORMAL_BUFF_PRIORITIES = {
+        CI.BUFF_006: 300,  # Probability UP
+        CI.BUFF_003: 200,  # Faster throwing
+        CI.BUFF_004: 100,  # Extra beans
+    }
     # --------------------------------------------------------------------------------
 
     def __init__(self, strategy: dict = None):
@@ -129,20 +135,75 @@ class Agent:
     def decision(self, tracks: list[tuple], state: list, freeze: bool = False) -> list:
         not_decision = [-1, -1, False, -1]
         if not tracks:
+            self._clear_focus()
             return not_decision
-        # Cache the time interval for scattering beans
-        new_time = datetime.now()
-        delta_time = 1000 * (new_time - self.last_throw_time).total_seconds()  # ms
-        self.check_observe(tracks=tracks)
-        if self.focus is None:
-            return not_decision
-        result = self.focus.decision(tracks=tracks, strategy=self.strategy, state=[delta_time] + state, freeze=freeze)
-        if result[2]:
-            self.last_throw_time = new_time
-            self.dbg_throw += 1
-        else:
+
+        target = self.select_target(tracks=tracks, state=state)
+        if target is None:
+            self._clear_focus()
             self.dbg_throw_n += 1
-        return result
+            return not_decision
+
+        target_focus = Focus(inputs=target)
+        if self.focus is None or self.focus._id != target_focus._id:
+            logger.info(f'Focus changed, now: {id2name(target_focus._class)}')
+            self.focus = target_focus
+        else:
+            self.focus.update(target_focus)
+
+        is_buff = self.focus._class in self.NORMAL_BUFF_PRIORITIES or self.focus._class == CI.BUFF_002
+        target_x = self.focus._cx + self.focus._v * 100
+        if not is_buff:
+            target_x -= self.focus._w // 2
+        target_y = self.focus._cy - 40
+        target_x = int(max(0, min(1279, target_x)))
+        target_y = int(max(0, min(719, target_y)))
+
+        self.last_throw_time = datetime.now()
+        self.dbg_throw += 1
+        return [target_x, target_y, True, 10]
+
+    @staticmethod
+    def is_ssr_or_sp(class_id: int) -> bool:
+        return (CI.MIN_SSR <= class_id <= CI.MAX_SSR or
+                CI.MIN_SP <= class_id <= CI.MAX_SP)
+
+    @classmethod
+    def select_target(cls, tracks: list[tuple], state: list) -> tuple | None:
+        rare_tracks = [track for track in tracks if cls.is_ssr_or_sp(track[1])]
+        has_prob_up = HyaBuff.BUFF_STATE6 in state[3:]
+
+        # Slow down rare targets while Probability UP is active, keeping them recognizable.
+        if has_prob_up and rare_tracks:
+            slow_tracks = [track for track in tracks if track[1] == CI.BUFF_002]
+            if slow_tracks:
+                return cls._choose_track(slow_tracks)
+
+        prob_up_tracks = [track for track in tracks if track[1] == CI.BUFF_006]
+        if rare_tracks and prob_up_tracks:
+            return cls._choose_track(prob_up_tracks)
+        left_prob_up_tracks = [track for track in prob_up_tracks if track[3] <= 640]
+        if left_prob_up_tracks:
+            return cls._choose_track(left_prob_up_tracks)
+
+        for buff_class in (CI.BUFF_003, CI.BUFF_004):
+            buff_tracks = [track for track in tracks if track[1] == buff_class]
+            if buff_tracks:
+                return cls._choose_track(buff_tracks)
+
+        if rare_tracks:
+            return cls._choose_track(rare_tracks)
+        return None
+
+    @staticmethod
+    def _choose_track(tracks: list[tuple]) -> tuple:
+        # Prefer the target furthest to the right, leaving more time to keep throwing at it.
+        return max(tracks, key=lambda track: track[3])
+
+    def _clear_focus(self):
+        if self.focus is not None:
+            logger.info('Focus disappear')
+        self.focus = None
 
     def check_observe(self, tracks: list[tuple]):
         z = Agent.gamma(tracks=tracks, weights=self.weights, priorities=self.priorities)
@@ -162,4 +223,3 @@ class Agent:
             self.focus.set_omega(omega)
         # if Debugger.info_enable:
         #     self.focus.show()
-

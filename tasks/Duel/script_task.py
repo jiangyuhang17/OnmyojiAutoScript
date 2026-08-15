@@ -9,6 +9,8 @@ from datetime import time, datetime, timedelta
 from module.logger import logger
 from module.exception import TaskEnd
 from module.base.timer import Timer
+from module.atom.ocr import RuleOcr
+from module.atom.click import RuleClick
 
 from tasks.Component.GeneralBattle.general_battle import GeneralBattle
 from tasks.Component.SwitchOnmyoji.switch_onmyoji import SwitchOnmyoji
@@ -23,6 +25,15 @@ from tasks.GameUi.page import page_main, page_shikigami_records
 
 
 class ScriptTask(GameUi, GeneralBattle, SwitchSoul, DuelAssets, SwitchOnmyoji):
+    O_D_LOCKED_CONFIRM = RuleOcr(
+        roi=(540, 390, 210, 90), area=(540, 390, 210, 90),
+        mode='Single', method='Default', keyword='确定', name='duel_locked_confirm'
+    )
+    C_D_LOCKED_CONFIRM = RuleClick(
+        roi_front=(580, 415, 120, 36), roi_back=(580, 415, 120, 36),
+        name='duel_locked_confirm'
+    )
+
     battle_win_count = 0
     battle_lose_count = 0
     current_score = 0
@@ -286,6 +297,11 @@ class ScriptTask(GameUi, GeneralBattle, SwitchSoul, DuelAssets, SwitchOnmyoji):
             if self.appear_then_click(self.I_D_TEAM_SWTICH, interval=1):
                 click_count += 1
                 continue
+        sleep(0.5)
+        self.screenshot()
+        if self.ocr_appear(self.O_D_LOCKED_CONFIRM):
+            self.click(self.C_D_LOCKED_CONFIRM, interval=0.6)
+            logger.info('Dismiss duel locked-team dialog')
         logger.info('Souls Switch is complete')
         self.ui_click(self.I_UI_BACK_YELLOW, self.I_D_TEAM)
 
@@ -305,7 +321,8 @@ class ScriptTask(GameUi, GeneralBattle, SwitchSoul, DuelAssets, SwitchOnmyoji):
             self.appear(self.I_D_CHECK_BAN)
 
     def is_battle_win(self) -> bool:
-        return self.appear(self.I_WIN) or self.appear(self.I_D_VICTORY)
+        return self.appear(self.I_WIN) or self.appear(self.I_D_VICTORY) or \
+            self.appear(self.I_D_RESULT_SHARE)
 
     def is_battle_lose(self) -> bool:
         return self.appear(self.I_FALSE) or self.appear(self.I_D_FAIL)

@@ -37,7 +37,8 @@ class GeneralBattle(GeneralBuff, GeneralBattleAssets):
         self.current_count += 1
         logger.info(f"Current count: {self.current_count}")
         # 战前设置
-        self.battle_before(buff, config)
+        if not self.battle_before(buff, config, timeout=15):
+            logger.warning("Still on preparation page, continue trying in battle process")
         # 绿标
         if self.is_in_battle(False):
             self.green_mark(config.green_enable, config.green_mark)
@@ -173,6 +174,9 @@ class GeneralBattle(GeneralBuff, GeneralBattleAssets):
         win: bool = False
         while 1:
             self.screenshot()
+            if self.appear_then_click(self.I_PREPARE_HIGHLIGHT, interval=1):
+                logger.info("Retry entering battle from preparation page")
+                continue
             # 如果出现赢 就点击, 第二个是针对封魔的图片
             if self.appear(self.I_WIN, threshold=0.8) or self.appear(self.I_DE_WIN):
                 logger.info("Battle result is win")
@@ -371,9 +375,14 @@ class GeneralBattle(GeneralBuff, GeneralBattleAssets):
             return None
 
         logger.info("Preset is enable")
+        preset_timer = Timer(15).start()
         # 点击预设按钮
         while 1:
             self.screenshot()
+
+            if preset_timer.reached():
+                logger.warning("Preset button not found, use current team")
+                return None
 
             if self.appear(self.I_PRESET_ENSURE):
                 break
@@ -422,6 +431,9 @@ class GeneralBattle(GeneralBuff, GeneralBattleAssets):
         unselected_color = (224.9, 208.3, 187.4)
         while True:
             self.screenshot()
+            if preset_timer.reached():
+                logger.warning("Select preset group timeout, use current team")
+                return None
             color_tmp = get_color(self.device.image,
                                   (tmp.roi_back[0], tmp.roi_back[1], tmp.roi_back[0] + color_size[0],
                                    tmp.roi_back[1] + color_size[1]))
@@ -442,6 +454,9 @@ class GeneralBattle(GeneralBuff, GeneralBattleAssets):
         unselected_color = (216.8, 185.0, 146.8)
         while True:
             self.screenshot()
+            if preset_timer.reached():
+                logger.warning("Select preset team timeout, use current team")
+                return None
             color_tmp = get_color(self.device.image,
                                   (tmp.roi_back[0], tmp.roi_back[1], tmp.roi_back[0] + color_size[0],
                                    tmp.roi_back[1] + color_size[1]))
@@ -460,6 +475,7 @@ class GeneralBattle(GeneralBuff, GeneralBattleAssets):
             self.screenshot()
             if click_timer.reached():
                 logger.warning("Switch preset failure")
+                return None
             if not self.appear(self.I_PRESET_ENSURE):
                 break
             if self.appear_then_click(self.I_PRESET_ENSURE, threshold=0.8, interval=1):
@@ -478,7 +494,7 @@ class GeneralBattle(GeneralBuff, GeneralBattleAssets):
                 case 2:
                     self.swipe(self.S_BATTLE_RANDOM_RIGHT, interval=20)
             # 重新设置为长战斗
-            # self.device.stuck_record_add('BATTLE_STATUS_S')
+            self.device.stuck_record_add('BATTLE_STATUS_S')
         else:
             time.sleep(0.4)  # 这样的好像不对
 

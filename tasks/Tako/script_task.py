@@ -70,7 +70,7 @@ class ScriptTask(GameUi, GeneralBattle, GeneralRoom, GeneralInvite, SwitchSoul):
                 logger.warning('Wait for too long, exit')
                 self.exit_room()
                 break
-            if not self.appear(self.I_ADD_1):
+            if not self.appear(self.I_ADD_1, threshold=0.85):
                 # 有人进来了，可以进行挑战
                 logger.info('There is someone in the room and start the challenge')
                 self.click_fire()
@@ -136,6 +136,5 @@ if __name__ == '__main__':
     t.screenshot()
 
     t.run()
-
 
 

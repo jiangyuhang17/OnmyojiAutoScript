@@ -213,20 +213,27 @@ class ScriptTask(GameUi, Summon, DailyTriflesAssets):
 
     def run_store(self):
         self.ui_get_current_page()
-        self.ui_goto(page_mall, confirm_wait=3)
+        if not self.ui_goto(page_mall, confirm_wait=3):
+            logger.warning('Failed to enter mall, skip store tasks')
+            self.ui_goto_page(page_main)
+            return
 
         if self.config.daily_trifles.trifles_config.store_sign:
             self.run_store_sign()
         if self.config.daily_trifles.trifles_config.buy_sushi_count > 0:
+            if not self.ui_goto_page(page_mall):
+                logger.warning('Failed to return to mall, skip buying sushi')
+                self.ui_goto_page(page_main)
+                return
             self.run_buy_sushi()
 
-        self.ui_click(self.I_UI_BACK_YELLOW, self.I_CHECK_MALL)
-        self.ui_get_current_page()
-        self.ui_goto(page_main)
+        self.ui_goto_page(page_main)
 
     def run_store_sign(self):
 
-        self.ui_goto_page(page_store_gift_room)
+        if not self.ui_goto_page(page_store_gift_room):
+            logger.warning('Failed to enter store gift room, skip store sign')
+            return False
         self.screenshot()
         self.appear_then_click(self.I_GIFT_RECOMMEND, interval=1)
         logger.info('Enter store sign')
@@ -234,10 +241,12 @@ class ScriptTask(GameUi, Summon, DailyTriflesAssets):
         self.screenshot()
         if not self.appear(self.I_GIFT_SIGN):
             logger.warning('There is no gift sign')
-            return
+            return False
 
         if self.ui_get_reward(self.I_GIFT_SIGN, click_interval=2.5):
             logger.info('Get reward of gift sign')
+            return True
+        return False
 
     def run_buy_sushi(self):
 

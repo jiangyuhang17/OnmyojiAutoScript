@@ -23,7 +23,7 @@
     "roiFront": "493,116,45,75",
     "roiBack": "243,100,933,211",
     "method": "Template matching",
-    "threshold": 0.8,
+    "threshold": 0.5,
     "description": "description"
   },
   {
@@ -250,5 +250,14 @@
     "method": "Template matching",
     "threshold": 0.8,
     "description": "description"
+  },
+  {
+    "itemName": "loading_screen",
+    "imageName": "page_loading_screen.png",
+    "roiFront": "520,680,240,38",
+    "roiBack": "500,670,280,50",
+    "method": "Template matching",
+    "threshold": 0.85,
+    "description": "Loading screen website mark"
   }
 ]

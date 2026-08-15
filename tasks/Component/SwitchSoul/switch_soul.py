@@ -258,6 +258,20 @@ class SwitchSoul(BaseTask, SwitchSoulAssets):
             # 有则跳出检测
             if result and len(result) > 0:
                 break
+            # Stylized names may be partially recognized. A unique result with
+            # the same first character is a safe fallback for longer names.
+            prefix_matches = [item for item in results
+                              if len(teamName) >= 3 and item.ocr_text
+                              and item.ocr_text[0] == teamName[0]]
+            if len(prefix_matches) == 1:
+                item = prefix_matches[0]
+                box = item.box
+                x = int((box[0, 0] + box[1, 0]) / 2 + self.O_SS_TEAM_NAME.roi[0])
+                y = int((box[0, 1] + box[2, 1]) / 2 + self.O_SS_TEAM_NAME.roi[1])
+                logger.warning(f'Fuzzy match soul team {teamName}: {item.ocr_text}')
+                self.click((x, y))
+                self._fuzzy_soul_team_y = y
+                return self._confirm_soul_team(groupName, teamName)
             self.swipe(self.S_SS_TEAM_SWIPE_UP, 0.3)
         logger.info('Swipe up to find target team')
 
@@ -281,6 +295,22 @@ class SwitchSoul(BaseTask, SwitchSoulAssets):
                 cnt_click += 1
                 continue
         logger.info(f'Switch soul_one group {groupName} team {teamName}')
+
+    def _confirm_soul_team(self, group_name: str, team_name: str):
+        """Switch a team already selected through a fuzzy OCR match."""
+        logger.info(f'Select team {team_name}')
+        click_timer = Timer(1.5).start()
+        click_count = 0
+        while click_count < 4:
+            self.screenshot()
+            if self.appear_then_click(self.I_SOU_SWITCH_SURE, interval=0.8):
+                continue
+            if click_timer.reached_and_reset():
+                x, _ = self.I_SOU_CLICK_PRESENT.coord()
+                self.device.click(x=x, y=self._fuzzy_soul_team_y,
+                                  control_name=self.O_SS_TEAM_NAME.name)
+                click_count += 1
+        logger.info(f'Switch soul_one group {group_name} team {team_name}')
 
     def ocr_appear_click_by_rule(self,
                                  target: RuleOcr,

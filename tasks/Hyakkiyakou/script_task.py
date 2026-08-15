@@ -111,7 +111,7 @@ class ScriptTask(GameUi, HyaSlave, SwitchOnmyoji):
         hya_interval = debug_config.hya_interval
         hya_save_result = debug_config.hya_save_result
         if hya_interval <= 100 or hya_interval >= 1000:
-            raise RequestHumanTakeover('screenshot_interval must be between 1000 and 10000')
+            raise RequestHumanTakeover('screenshot_interval must be between 100 and 1000 ms')
         self.set_fast_screenshot_interval(hya_interval)
         return Debugger(info_enable=debug_config.hya_info, 
                         continuous_learning=debug_config.continuous_learning,
@@ -198,8 +198,8 @@ class ScriptTask(GameUi, HyaSlave, SwitchOnmyoji):
                 best_class = _class
         if best_class != -1:
             logger.info(
-                f'Hyakki select: detect {id2name(_class)} '
-                f'with rarity score {score}'
+                f'Hyakki select: detect {id2name(best_class)} '
+                f'with rarity score {best_score}'
             )
         else:
             logger.warning('Hyakki select: no valid shikigami detected on title screen')
@@ -207,13 +207,13 @@ class ScriptTask(GameUi, HyaSlave, SwitchOnmyoji):
 
     def _select_best_boss(self):
         """
-        在鬼王选择界面依次点三个候选，识别稀有度，最终选择最高稀有度的那个。
+        在鬼王选择界面依次检查三个候选，优先选择首个 SP/SSR。
+        如果没有识别到 SP/SSR，则选择第一个候选。
         要求：当前已经在 I_HTITLE 画面。
         """
         candidates = [self.C_HSELECT_1, self.C_HSELECT_2, self.C_HSELECT_3]
         logger.info('Start selecting boss')
         best_idx = 0
-        best_score = -1
         scores = []
 
         for idx, btn in enumerate(candidates):
@@ -222,11 +222,11 @@ class ScriptTask(GameUi, HyaSlave, SwitchOnmyoji):
             time.sleep(1)  # 给界面一点刷新时间
             score, cls = self._detect_current_rarity()
             scores.append(score)
-            if score > best_score:
-                best_score = score
+            if self.agent.is_ssr_or_sp(cls):
                 best_idx = idx
-        
-        #所以如果三个都识别失败了会选第一个
+                logger.info(f'Hyakki select: rare boss found at index {idx + 1}')
+                break
+
         logger.info(f'Hyakki select scores: {scores}, choose index {best_idx + 1}') 
 
         # 记录一下，后面如果需要兜底再点一次可以用
@@ -275,18 +275,11 @@ class ScriptTask(GameUi, HyaSlave, SwitchOnmyoji):
                 init_bean_flag = True
                 self.bean_05to10()
                 time.sleep(0.5)
-            #修改：在这里不再区分freeze，而是将状态传到decision用于执行冻结策略
-            #目前被禁用了 因为冰冻状态下检测正确率约等于0 全是蝉冰雪女 =.=
-            if not self.appear(self.I_HFREEZE):
-                # -------------------------------------------------------
-                freeze = self.appear(self.I_HFREEZE)
-                self.slave_state = self.update_state()
-                tracks = self.tracker(image=self.device.image, response=last_action)
-                last_action = self.agent.decision(tracks=tracks, state=self.slave_state, freeze=freeze)
-                self.do_action(last_action, state=self.slave_state)
-            else:
-                # TODO freeze state
-                tracks = []
+            freeze = self.appear(self.I_HFREEZE)
+            self.slave_state = self.update_state()
+            tracks = self.tracker(image=self.device.image, response=last_action)
+            last_action = self.agent.decision(tracks=tracks, state=self.slave_state, freeze=freeze)
+            self.do_action(last_action, state=self.slave_state)
 
             # debug
             if self._config.debug_config.hya_show:
@@ -334,4 +327,3 @@ if __name__ == '__main__':
     # from debugger import test_track
     # test_track(show=False)
     pass
-

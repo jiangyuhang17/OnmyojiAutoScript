@@ -60,20 +60,37 @@ class ScriptTask(GameUi, GeneralBattle, SwitchSoul, SecretAssets):
         self.ui_click(self.I_SE_ENTER, self.I_SE_FIRE)
         time.sleep(1)  # 有一个很傻逼的动画
         self.screenshot()
-        if not self.appear(self.I_SE_PLACEMENT):
+        entered_prepare = self.is_in_prepare(False)
+        if entered_prepare:
+            logger.warning('Secret zone battle preparation opened early, take over battle')
+        elif not self.appear(self.I_SE_PLACEMENT):
             logger.warning('Unsuccessful entry. You must have entered the secret zone before.')
             success = False
 
         # 开始
         logger.info('Start secret zone')
         first_battle = True
+        if entered_prepare:
+            buff = []
+            if con.secret_gold_50:
+                buff.append(BuffClass.GOLD_50)
+            if con.secret_gold_100:
+                buff.append(BuffClass.GOLD_100)
+            success = self.run_general_battle(self.battle_config, buff=buff or None)
+            first_battle = False
+
+        page_wait_timer = Timer(30).start()
         while 1:
             self.screenshot()
             if not success:
                 logger.warning('Secret zone failed to enter, skip')
                 break
             if not self.appear(self.I_SE_FIRE):
+                if page_wait_timer.reached():
+                    logger.warning('Secret zone challenge page not found, stop task')
+                    break
                 continue
+            page_wait_timer.reset()
             if self.appear(self.I_SE_FINISHED_1):
                 logger.info('Secret zone finished')
                 break
@@ -130,10 +147,7 @@ class ScriptTask(GameUi, GeneralBattle, SwitchSoul, SecretAssets):
                 success = self.run_general_battle(self.battle_config)
                 continue
 
-        self.ui_click(self.I_UI_BACK_BLUE, self.I_UI_BACK_YELLOW)
-        self.ui_click(self.I_UI_BACK_YELLOW, self.I_CHECK_MAIN)
-        self.ui_get_current_page()
-        self.ui_goto(page_main)
+        self.ui_goto_page(page_main)
         if con.secret_gold_50 or con.secret_gold_100:
             self.open_buff()
             if con.secret_gold_50:

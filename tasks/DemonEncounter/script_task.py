@@ -181,7 +181,7 @@ class ScriptTask(GameUi, GeneralBattle, DemonEncounterAssets, SwitchSoul):
                 logger.info('Boss battle failed, waiting for 2 seconds...')
                 sleep(2)
                 continue
-            if self.appear(self.I_PREPARE_HIGHLIGHT):
+            if self.appear(self.I_PREPARE_HIGHLIGHT) or self.is_in_real_battle(False):
                 if preset_switched:
                     self.run_general_battle()
                     continue
@@ -196,8 +196,8 @@ class ScriptTask(GameUi, GeneralBattle, DemonEncounterAssets, SwitchSoul):
                                                                              demon_battle_conf=self.conf.demon_battle_config)
                 self.run_general_battle(config=general_battle_config)
                 continue
-            logger.info('Unknown scene Or Boss fight failed.waiting for Prepare_Button appear...')
-            self.wait_until_appear(self.I_PREPARE_HIGHLIGHT, wait_time=2)
+            logger.info('Waiting for boss scene transition...')
+            sleep(2)
 
         self.device.stuck_timer_long = Timer(300, count=300).start()
 

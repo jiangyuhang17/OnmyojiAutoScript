@@ -30,8 +30,8 @@ class DailyTriflesAssets:
 	# Image Rule Assets
 	# 礼包屋 
 	I_ROOM_GIFT = RuleImage(roi_front=(1138,658,52,40), roi_back=(1119,621,103,94), threshold=0.8, method="Template matching", file="./tasks/DailyTrifles/store/store_room_gift.png")
-	# description 
-	I_GIFT_RECOMMEND = RuleImage(roi_front=(1183,454,53,64), roi_back=(1162,77,98,457), threshold=0.7, method="Template matching", file="./tasks/DailyTrifles/store/store_gift_recommend.png")
+	# Gift room daily tab
+	I_GIFT_RECOMMEND = RuleImage(roi_front=(1180,520,92,104), roi_back=(1160,500,120,150), threshold=0.8, method="Template matching", file="./tasks/DailyTrifles/store/store_gift_recommend.png")
 	# 免费一抽领黑蛋 
 	I_GIFT_SIGN = RuleImage(roi_front=(186,191,115,83), roi_back=(130,129,891,473), threshold=0.8, method="Template matching", file="./tasks/DailyTrifles/store/store_gift_sign.png")
 	# 体力 
@@ -71,5 +71,3 @@ class DailyTriflesAssets:
 	O_SELECT_SM4 = RuleOcr(roi=(26,397,45,38), area=(26,397,45,38), mode="Single", method="Default", keyword="", name="select_sm4")
 	# 吉闻 
 	O_LUCK_MSG = RuleOcr(roi=(15,38,70,70), area=(15,38,70,70), mode="Single", method="Default", keyword="吉闻", name="luck_msg")
-
-

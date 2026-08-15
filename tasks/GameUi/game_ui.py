@@ -116,12 +116,20 @@ class GameUi(BaseTask, GameUiAssets):
             self.device.get_orientation()
 
         timeout = Timer(10, count=20).start()
+        loading_timeout = Timer(45).start()
         while 1:
             self.maybe_screenshot(skip_first_screenshot)
             skip_first_screenshot = False
             # 如果10S还没有到底，那么就抛出异常
             if timeout.reached():
                 break
+            if self.appear(self.I_LOADING_SCREEN):
+                if loading_timeout.reached():
+                    logger.warning('Loading screen timeout')
+                    break
+                timeout.reset()
+                sleep(1)
+                continue
             # Known pages
             for page in self.ui_pages:
                 if not page.check_button:
@@ -135,7 +143,7 @@ class GameUi(BaseTask, GameUiAssets):
                 timeout = Timer(10, count=20).start()
             else:
                 # entirely unknown page, click safe random area
-                self.click(random_click(), interval=4)
+                self.click(random_click(), interval=1.5)
             # wait to ui
             sleep(0.3)
             app_check()
@@ -231,7 +239,9 @@ class GameUi(BaseTask, GameUiAssets):
             logger.info(f"{show_paths}")
             # 遍历路径
             found = self._execute_path(path, timeout_timer)
-            if not found:
+            # Keep retrying from a recognized supported page. Closing it here
+            # can move us backwards just because a transition click was missed.
+            if not found and self.ui_current not in path_dict:
                 if close_unknown_timer.reached_and_reset():
                     self.try_close_unknown_page(skip_screenshot=False)
                     self.ui_current = None

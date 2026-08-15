@@ -11,11 +11,11 @@
   {
     "itemName": "gift_recommend",
     "imageName": "store_gift_recommend.png",
-    "roiFront": "1183,454,53,64",
-    "roiBack": "1162,77,98,457",
+    "roiFront": "1180,520,92,104",
+    "roiBack": "1160,500,120,150",
     "method": "Template matching",
-    "threshold": 0.7,
-    "description": "description"
+    "threshold": 0.8,
+    "description": "Gift room daily tab"
   },
   {
     "itemName": "gift_sign",
