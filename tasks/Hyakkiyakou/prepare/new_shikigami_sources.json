@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "entries": [
+    {"slug": "chenhui_ebisu", "name": "晨晖惠比寿", "rarity": "SP", "sources": [{"url": "https://www.taptap.cn/moment/520922052845110412", "kind": "showcase", "official": true}, {"url": "https://www.bilibili.com/video/BV1dm411r7ZN/", "kind": "showcase", "official": true}]},
+    {"slug": "longyin_suzuka_gozen", "name": "龙吟铃鹿御前", "rarity": "SP", "sources": [{"url": "https://www.taptap.cn/moment/539741263159625124", "kind": "showcase", "official": true}, {"url": "https://www.bilibili.com/video/BV1WD421G7YH/", "kind": "showcase", "official": true}]},
+    {"slug": "yaonian_enenra", "name": "遥念烟烟罗", "rarity": "SP", "sources": [{"url": "https://www.taptap.cn/moment/569953034587605286", "kind": "biography", "official": true}, {"url": "https://www.bilibili.com/video/BV1sb421J7y7/", "kind": "showcase", "official": true}]},
+    {"slug": "xinyou_inugami", "name": "心友犬神", "rarity": "SP", "sources": [{"url": "https://www.bilibili.com/video/BV1bZ421L77c/", "kind": "showcase", "official": true}]},
+    {"slug": "shenniang_hoshiguma_dojo", "name": "神酿星熊童子", "rarity": "SP", "sources": [{"url": "https://www.bilibili.com/video/BV1LTzgY4EZP/", "kind": "cg", "official": true}, {"url": "https://www.bilibili.com/video/BV1HfzVYEE26/?p=18", "kind": "showcase", "official": false}]},
+    {"slug": "yaoyin_kinnara", "name": "瑶音紧那罗", "rarity": "SP", "sources": [{"url": "https://www.taptap.cn/moment/627871063337862653", "kind": "showcase", "official": true}, {"url": "https://www.bilibili.com/video/BV1aXcyeuEuw/", "kind": "showcase", "official": true}]},
+    {"slug": "qingsi_hiyoribo", "name": "晴思日和坊", "rarity": "SP", "sources": [{"url": "https://www.taptap.cn/moment/628229803274666891", "kind": "showcase", "official": true}]},
+    {"slug": "shiyao_takiyashahime", "name": "时曜泷夜叉姬", "rarity": "SP", "sources": [{"url": "https://www.taptap.cn/moment/671471831298867693", "kind": "showcase", "official": true}, {"url": "https://www.bilibili.com/video/BV18NEAzHEbt/", "kind": "showcase", "official": true}]},
+    {"slug": "yunjian_fugengaku", "name": "云间不见岳", "rarity": "SP", "sources": [{"url": "https://www.taptap.cn/moment/691687997069855497", "kind": "showcase", "official": true}, {"url": "https://www.bilibili.com/video/BV1XwGnzREc2/", "kind": "showcase", "official": true}]},
+    {"slug": "mengyin_kocho", "name": "梦引蝴蝶精", "rarity": "SP", "sources": [{"url": "https://www.taptap.cn/moment/737319285797423815", "kind": "showcase", "official": true}, {"url": "https://www.bilibili.com/video/BV19LkrBkEYx/", "kind": "showcase", "official": true}]},
+    {"slug": "mengshan_shiro", "name": "梦山白藏主", "rarity": "SP", "sources": [{"url": "https://www.taptap.cn/moment/747064794455999144", "kind": "showcase", "official": true}]},
+    {"slug": "zhuohua_momo", "name": "灼华桃花妖", "rarity": "SP", "sources": [{"url": "https://www.taptap.cn/moment/767472289624097937", "kind": "showcase", "official": true}]},
+    {"slug": "shiyue_ketsukihime", "name": "蚀月吸血姬", "rarity": "SP", "sources": [{"url": "https://www.taptap.cn/moment/777965156402466105", "kind": "showcase", "official": true}]},
+    {"slug": "tianhuo_suzuhikohime", "name": "天火命铃彦姬", "rarity": "SP", "sources": [{"url": "https://www.taptap.cn/moment/805499589309236450", "kind": "showcase", "official": true}]},
+
+    {"slug": "kannazuki", "name": "神无月", "rarity": "SSR", "sources": [{"url": "https://www.taptap.cn/moment/757677104446835602", "kind": "showcase", "official": true}, {"url": "https://www.bilibili.com/video/BV1wbrbBHEML/", "kind": "cg", "official": true}]},
+    {"slug": "shikinshin", "name": "思金神", "rarity": "SSR", "sources": [{"url": "https://www.taptap.cn/moment/795339492968892184", "kind": "showcase", "official": true}, {"url": "https://www.bilibili.com/video/BV1VtoKBmEsU/", "kind": "showcase", "official": true}]},
+    {"slug": "ichikami", "name": "市加美", "rarity": "SSR", "sources": [{"url": "https://www.taptap.cn/moment/785588352609944253", "kind": "showcase", "official": true}, {"url": "https://www.bilibili.com/video/BV1xEQBBLEhp/", "kind": "showcase", "official": true}]},
+    {"slug": "magatsugami", "name": "祸津神", "rarity": "SSR", "sources": [{"url": "https://www.taptap.cn/moment/559849205267434263", "kind": "showcase", "official": true}, {"url": "https://www.bilibili.com/video/BV1ez421q7CA/", "kind": "showcase", "official": true}]},
+    {"slug": "nekogawa", "name": "猫川", "rarity": "SSR", "sources": [{"url": "https://www.taptap.cn/moment/549874714017792147", "kind": "showcase", "official": true}, {"url": "https://www.bilibili.com/video/BV1nZ421u7pE/", "kind": "showcase", "official": true}]},
+    {"slug": "longjue", "name": "龙珏", "rarity": "SSR", "sources": [{"url": "https://www.taptap.cn/moment/579761450877191605", "kind": "showcase", "official": true}, {"url": "https://www.bilibili.com/video/BV19f421i7Gu/", "kind": "showcase", "official": true}]},
+    {"slug": "fengyangjun", "name": "封阳君", "rarity": "SSR", "sources": [{"url": "https://www.bilibili.com/video/BV1kXxCemEuB/", "kind": "showcase", "official": true}]},
+    {"slug": "onikaneyohi", "name": "鬼金羊", "rarity": "SSR", "sources": [{"url": "https://www.bilibili.com/video/BV1LpStYiE8A/", "kind": "showcase", "official": true}]},
+    {"slug": "karuta", "name": "歌留多", "rarity": "SSR", "sources": [{"url": "https://www.taptap.cn/moment/640601677711281955", "kind": "showcase", "official": true}, {"url": "https://www.bilibili.com/video/BV1Yvw9eiEgR/", "kind": "showcase", "official": true}]},
+    {"slug": "himiko", "name": "卑弥呼", "rarity": "SSR", "sources": [{"url": "https://www.taptap.cn/moment/660904544120606005", "kind": "showcase", "official": true}, {"url": "https://www.bilibili.com/video/BV1J3ojYfEBm/", "kind": "showcase", "official": true}]},
+    {"slug": "arakuro", "name": "荒骷髅", "rarity": "SSR", "sources": [{"url": "https://www.taptap.cn/moment/681616148818562610", "kind": "showcase", "official": true}, {"url": "https://www.bilibili.com/video/BV11CMgzGEf2/", "kind": "showcase", "official": true}]},
+    {"slug": "yuki_gozen", "name": "雪御前", "rarity": "SSR", "sources": [{"url": "https://www.taptap.cn/moment/711216682386850591", "kind": "showcase", "official": true}, {"url": "https://www.bilibili.com/video/BV1C3hCzXEwx/", "kind": "showcase", "official": true}]},
+    {"slug": "taira_no_masakado", "name": "平将门", "rarity": "SSR", "sources": [{"url": "https://www.taptap.cn/moment/721798218983148838", "kind": "showcase", "official": true}, {"url": "https://www.bilibili.com/video/BV1nrnqzkE4s/", "kind": "showcase", "official": true}]},
+    {"slug": "kuzuha", "name": "葛叶", "rarity": "SSR", "sources": [{"url": "https://www.taptap.cn/moment/767463232372738382", "kind": "showcase", "official": true}, {"url": "https://www.bilibili.com/video/BV1SPFMzQEEd/", "kind": "showcase", "official": true}]},
+    {"slug": "bishamonten", "name": "毗沙门天", "rarity": "SSR", "sources": [{"url": "https://www.taptap.cn/moment/815649772877647051", "kind": "showcase", "official": true}, {"url": "https://www.bilibili.com/video/BV12rJG6aEyS/", "kind": "showcase", "official": true}]},
+    {"slug": "fuso_kozen", "name": "不相狐禅", "rarity": "SSR", "sources": [{"url": "https://www.bilibili.com/video/BV13QME6fErH/", "kind": "showcase", "official": true}]}
+  ]
+}

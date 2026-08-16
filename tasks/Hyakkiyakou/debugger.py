@@ -70,6 +70,8 @@ def show_track(sync_image, sync_lock, stop_event):
 
 
 class Debugger:
+    LEARNING_CAPTURE_INTERVAL = 0.5
+    LEARNING_JPEG_QUALITY = 92
     info_enable: bool = False
     sync_image = None
     sync_lock = Lock()
@@ -86,6 +88,7 @@ class Debugger:
         self._reset_thread_env()
         Debugger.info_enable = info_enable
         self.images_cache: dict = {}
+        self._last_learning_capture = 0.0
         self.continuous_learning = continuous_learning
         self.hya_save_result = hya_save_result
         if continuous_learning:
@@ -144,24 +147,29 @@ class Debugger:
         return _class in self.save_class
 
     def deal_learning(self, image, tracks: list):
-        save_flag: bool = False
-        for _id, _class, _conf, _cx, _cy, _w, _h, _v in tracks:
-            if self.check_class(_class):
-                save_flag = True
-                break
-        if not save_flag:
+        now = time.monotonic()
+        if now - self._last_learning_capture < self.LEARNING_CAPTURE_INTERVAL:
+            return
+        self._last_learning_capture = now
+
+        # Capture the whole playfield even when the old model misses a new shikigami.
+        save_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        success, encoded = cv2.imencode(
+            '.jpg', save_image, [cv2.IMWRITE_JPEG_QUALITY, self.LEARNING_JPEG_QUALITY]
+        )
+        if not success:
+            logger.warning('Failed to encode Hyakkiyakou learning image')
             return
         time_now_image_name = f'hya_{int(time.time() * 1000)}'
-        self.images_cache[time_now_image_name] = image
+        self.images_cache[time_now_image_name] = encoded
 
     def save_images(self):
         if not self.images_cache:
             self.images_cache: dict = {}
             return
         logger.info('OAS Track Debugger save images to train model')
-        for image_name, image in self.images_cache.items():
-            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-            cv2.imwrite(str(self.hya_save_folder / f'{image_name}.png'), image)
+        for image_name, encoded in self.images_cache.items():
+            encoded.tofile(self.hya_save_folder / f'{image_name}.jpg')
         self.images_cache.clear()
 
     def save_result(self, image):

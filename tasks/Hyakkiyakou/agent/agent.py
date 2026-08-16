@@ -57,10 +57,12 @@ def embed_patch_in_canvas(canvas, patch, position=(0, 0), patch_size=(300, 300))
 class Agent:
     GAUSSIAN = generate_gaussian_patch()
     OBSERVE_THRESHOLD = 0.6
+    PROBABILITY_UP_EARLY_X = 720
     NORMAL_BUFF_PRIORITIES = {
         CI.BUFF_006: 300,  # Probability UP
         CI.BUFF_003: 200,  # Faster throwing
         CI.BUFF_004: 100,  # Extra beans
+        CI.BUFF_007: 50,   # Friend Probability UP
     }
     # --------------------------------------------------------------------------------
 
@@ -173,7 +175,7 @@ class Agent:
         rare_tracks = [track for track in tracks if cls.is_ssr_or_sp(track[1])]
         has_prob_up = HyaBuff.BUFF_STATE6 in state[3:]
 
-        # Slow down rare targets while Probability UP is active, keeping them recognizable.
+        # Slow only when Probability UP is already active and a rare target is present.
         if has_prob_up and rare_tracks:
             slow_tracks = [track for track in tracks if track[1] == CI.BUFF_002]
             if slow_tracks:
@@ -182,17 +184,27 @@ class Agent:
         prob_up_tracks = [track for track in tracks if track[1] == CI.BUFF_006]
         if rare_tracks and prob_up_tracks:
             return cls._choose_track(prob_up_tracks)
-        left_prob_up_tracks = [track for track in prob_up_tracks if track[3] <= 640]
+        left_prob_up_tracks = [
+            track for track in prob_up_tracks
+            if track[3] <= cls.PROBABILITY_UP_EARLY_X
+        ]
         if left_prob_up_tracks:
             return cls._choose_track(left_prob_up_tracks)
 
-        for buff_class in (CI.BUFF_003, CI.BUFF_004):
-            buff_tracks = [track for track in tracks if track[1] == buff_class]
-            if buff_tracks:
-                return cls._choose_track(buff_tracks)
+        faster_throw_tracks = [track for track in tracks if track[1] == CI.BUFF_003]
+        if faster_throw_tracks:
+            return cls._choose_track(faster_throw_tracks)
 
         if rare_tracks:
             return cls._choose_track(rare_tracks)
+
+        extra_bean_tracks = [track for track in tracks if track[1] == CI.BUFF_004]
+        if extra_bean_tracks:
+            return cls._choose_track(extra_bean_tracks)
+
+        friend_prob_up_tracks = [track for track in tracks if track[1] == CI.BUFF_007]
+        if friend_prob_up_tracks:
+            return cls._choose_track(friend_prob_up_tracks)
         return None
 
     @staticmethod

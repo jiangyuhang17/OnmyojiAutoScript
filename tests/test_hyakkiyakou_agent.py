@@ -17,15 +17,13 @@ class HyakkiyakouAgentTest(unittest.TestCase):
         self.ssr = CI.MIN_SSR
         self.sp = CI.MIN_SP
 
-    def test_only_targets_ssr_or_sp_shikigami(self):
+    def test_targets_rare_without_active_probability_buff(self):
         tracks = [track(1, CI.MIN_SR, 1100), track(2, self.ssr, 700)]
 
-        selected = Agent.select_target(tracks, self.empty_state)
-
-        self.assertEqual(selected[0], 2)
+        self.assertEqual(Agent.select_target(tracks, self.empty_state)[0], 2)
 
     def test_ignores_non_rare_shikigami_and_unwanted_buffs(self):
-        tracks = [track(1, CI.MIN_SR), track(2, CI.BUFF_002), track(3, CI.BUFF_007)]
+        tracks = [track(1, CI.MIN_SR), track(2, CI.BUFF_002), track(3, CI.BUFF_005)]
 
         selected = Agent.select_target(tracks, self.empty_state)
 
@@ -50,9 +48,9 @@ class HyakkiyakouAgentTest(unittest.TestCase):
 
         self.assertEqual(selected[1], CI.BUFF_006)
 
-    def test_prob_up_waits_until_left_half_without_rare_target(self):
-        right_tracks = [track(1, CI.BUFF_006, 900)]
-        left_tracks = [track(1, CI.BUFF_006, 640)]
+    def test_prob_up_waits_until_early_threshold_without_rare_target(self):
+        right_tracks = [track(1, CI.BUFF_006, 721)]
+        left_tracks = [track(1, CI.BUFF_006, 720)]
 
         self.assertIsNone(Agent.select_target(right_tracks, self.empty_state))
         self.assertEqual(Agent.select_target(left_tracks, self.empty_state)[1], CI.BUFF_006)
@@ -88,7 +86,7 @@ class HyakkiyakouAgentTest(unittest.TestCase):
     def test_slow_is_ignored_without_rare_target(self):
         tracks = [track(1, CI.BUFF_002), track(2, CI.MIN_SR)]
 
-        selected = Agent.select_target(tracks, self.prob_up_state)
+        selected = Agent.select_target(tracks, self.empty_state)
 
         self.assertIsNone(selected)
 
@@ -102,7 +100,7 @@ class HyakkiyakouAgentTest(unittest.TestCase):
     def test_prefers_rightmost_rare_target(self):
         tracks = [track(1, self.ssr, 500), track(2, self.sp, 1000)]
 
-        selected = Agent.select_target(tracks, self.empty_state)
+        selected = Agent.select_target(tracks, self.prob_up_state)
 
         self.assertEqual(selected[0], 2)
 

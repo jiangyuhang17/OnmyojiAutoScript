@@ -24,6 +24,7 @@ from tasks.GameUi.game_ui import GameUi
 from tasks.GameUi.page import page_hyakkiyakou, page_main, page_onmyodo
 from tasks.Hyakkiyakou.config import InferenceEngine, ModelPrecision
 from tasks.Hyakkiyakou.agent.agent import Agent
+from tasks.Hyakkiyakou.agent.new_rare import NewRareRecognizer
 from tasks.Hyakkiyakou.slave.hya_slave import HyaSlave
 from tasks.Hyakkiyakou.debugger import Debugger
 
@@ -104,6 +105,10 @@ class ScriptTask(GameUi, HyaSlave, SwitchOnmyoji):
             'auto_bean': hya_config.hya_auto_bean
         }
         return Agent(strategy=strategy)
+
+    @cached_property
+    def new_rare_recognizer(self) -> NewRareRecognizer:
+        return NewRareRecognizer()
 
     @cached_property
     def debugger(self) -> Debugger:
@@ -188,7 +193,8 @@ class ScriptTask(GameUi, HyaSlave, SwitchOnmyoji):
         # 截一张当前图
         self.screenshot()
         # 这里 response 随便给一个默认值即可，主线战斗里是 last_action
-        tracks = self.tracker(image=self.device.image, response=[0, 0, False, 10])
+        tracks = list(self.tracker(image=self.device.image, response=[0, 0, False, 10]))
+        tracks.extend(self.new_rare_recognizer(image=self.device.image))
         best_score = -1
         best_class = -1
         for _id, _class, _conf, _cx, _cy, _w, _h, _v in tracks:
@@ -277,7 +283,8 @@ class ScriptTask(GameUi, HyaSlave, SwitchOnmyoji):
                 time.sleep(0.5)
             freeze = self.appear(self.I_HFREEZE)
             self.slave_state = self.update_state()
-            tracks = self.tracker(image=self.device.image, response=last_action)
+            tracks = list(self.tracker(image=self.device.image, response=last_action))
+            tracks.extend(self.new_rare_recognizer(image=self.device.image))
             last_action = self.agent.decision(tracks=tracks, state=self.slave_state, freeze=freeze)
             self.do_action(last_action, state=self.slave_state)
 

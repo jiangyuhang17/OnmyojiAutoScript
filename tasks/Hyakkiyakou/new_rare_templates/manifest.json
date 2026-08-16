@@ -1,0 +1,384 @@
+{
+  "version": 1,
+  "threshold": 0.85,
+  "templates": [
+    {
+      "name": "arakuro",
+      "file": "arakuro_0.png",
+      "source": "local:hya_1786808142237.jpg",
+      "width": 245,
+      "height": 330
+    },
+    {
+      "name": "arakuro",
+      "file": "arakuro_1.png",
+      "source": "local:hya_1786808143012.jpg",
+      "width": 305,
+      "height": 335
+    },
+    {
+      "name": "arakuro",
+      "file": "arakuro_2.png",
+      "source": "local:hya_1786808143828.jpg",
+      "width": 320,
+      "height": 340
+    },
+    {
+      "name": "shiyao_takiyashahime",
+      "file": "shiyao_takiyashahime_0.png",
+      "source": "local:hya_1786808359590.jpg",
+      "width": 330,
+      "height": 325
+    },
+    {
+      "name": "shiyao_takiyashahime",
+      "file": "shiyao_takiyashahime_1.png",
+      "source": "local:hya_1786808360090.jpg",
+      "width": 310,
+      "height": 325
+    },
+    {
+      "name": "shiyao_takiyashahime",
+      "file": "shiyao_takiyashahime_2.png",
+      "source": "local:hya_1786808360677.jpg",
+      "width": 290,
+      "height": 330
+    },
+    {
+      "name": "shiyao_takiyashahime",
+      "file": "shiyao_takiyashahime_3.png",
+      "source": "local:hya_1786808361788.jpg",
+      "width": 285,
+      "height": 325
+    },
+    {
+      "name": "chenhui_ebisu",
+      "file": "chenhui_ebisu_0.png",
+      "source": "local:hya_1786808440713.jpg",
+      "width": 330,
+      "height": 340
+    },
+    {
+      "name": "chenhui_ebisu",
+      "file": "chenhui_ebisu_1.png",
+      "source": "local:hya_1786808441216.jpg",
+      "width": 330,
+      "height": 340
+    },
+    {
+      "name": "chenhui_ebisu",
+      "file": "chenhui_ebisu_2.png",
+      "source": "local:hya_1786808442193.jpg",
+      "width": 355,
+      "height": 340
+    },
+    {
+      "name": "taira_no_masakado",
+      "file": "taira_no_masakado_0.png",
+      "source": "local_20260816T17:hya_1786871038237.jpg",
+      "width": 330,
+      "height": 350
+    },
+    {
+      "name": "taira_no_masakado",
+      "file": "taira_no_masakado_1.png",
+      "source": "local_20260816T17:hya_1786871039075.jpg",
+      "width": 335,
+      "height": 350
+    },
+    {
+      "name": "taira_no_masakado",
+      "file": "taira_no_masakado_2.png",
+      "source": "local_20260816T17:hya_1786871039898.jpg",
+      "width": 355,
+      "height": 355
+    },
+    {
+      "name": "taira_no_masakado",
+      "file": "taira_no_masakado_3.png",
+      "source": "local_20260816T17:hya_1786871040684.jpg",
+      "width": 360,
+      "height": 355
+    },
+    {
+      "name": "taira_no_masakado",
+      "file": "taira_no_masakado_4.png",
+      "source": "public_20260814:event_0277_00_07748.405.jpg",
+      "width": 310,
+      "height": 295
+    },
+    {
+      "name": "taira_no_masakado",
+      "file": "taira_no_masakado_5.png",
+      "source": "public_20260814:event_0277_01_07748.882.jpg",
+      "width": 290,
+      "height": 290
+    },
+    {
+      "name": "taira_no_masakado",
+      "file": "taira_no_masakado_6.png",
+      "source": "public_20260814:event_0277_02_07749.359.jpg",
+      "width": 300,
+      "height": 290
+    },
+    {
+      "name": "taira_no_masakado",
+      "file": "taira_no_masakado_7.png",
+      "source": "public_20260814:event_0277_03_07749.836.jpg",
+      "width": 305,
+      "height": 285
+    },
+    {
+      "name": "taira_no_masakado",
+      "file": "taira_no_masakado_8.png",
+      "source": "public_20260814:event_0277_04_07750.313.jpg",
+      "width": 420,
+      "height": 295
+    },
+    {
+      "name": "taira_no_masakado",
+      "file": "taira_no_masakado_9.png",
+      "source": "public_20260814:event_0277_05_07750.790.jpg",
+      "width": 345,
+      "height": 290
+    },
+    {
+      "name": "kannazuki",
+      "file": "kannazuki_0.png",
+      "source": "local_20260816T17:hya_1786871141282.jpg",
+      "width": 285,
+      "height": 375
+    },
+    {
+      "name": "kannazuki",
+      "file": "kannazuki_1.png",
+      "source": "local_20260816T17:hya_1786871141966.jpg",
+      "width": 295,
+      "height": 375
+    },
+    {
+      "name": "kannazuki",
+      "file": "kannazuki_2.png",
+      "source": "local_20260816T17:hya_1786871142755.jpg",
+      "width": 300,
+      "height": 375
+    },
+    {
+      "name": "kannazuki",
+      "file": "kannazuki_3.png",
+      "source": "local_20260816T17:hya_1786871143453.jpg",
+      "width": 305,
+      "height": 375
+    },
+    {
+      "name": "kannazuki",
+      "file": "kannazuki_4.png",
+      "source": "local_20260816T17:hya_1786871144166.jpg",
+      "width": 310,
+      "height": 375
+    },
+    {
+      "name": "kannazuki",
+      "file": "kannazuki_5.png",
+      "source": "public_kannazuki:event_0004_04_00039.467.jpg",
+      "width": 280,
+      "height": 305
+    },
+    {
+      "name": "kannazuki",
+      "file": "kannazuki_6.png",
+      "source": "public_kannazuki:event_0004_06_00040.000.jpg",
+      "width": 275,
+      "height": 305
+    },
+    {
+      "name": "kannazuki",
+      "file": "kannazuki_7.png",
+      "source": "public_kannazuki:event_0004_08_00040.533.jpg",
+      "width": 280,
+      "height": 305
+    },
+    {
+      "name": "kannazuki",
+      "file": "kannazuki_8.png",
+      "source": "public_kannazuki:event_0004_10_00041.067.jpg",
+      "width": 275,
+      "height": 300
+    },
+    {
+      "name": "kannazuki",
+      "file": "kannazuki_9.png",
+      "source": "public_kannazuki:event_0004_12_00041.600.jpg",
+      "width": 285,
+      "height": 300
+    },
+    {
+      "name": "shenniang_hoshiguma_dojo",
+      "file": "shenniang_hoshiguma_dojo_0.png",
+      "source": "local_20260816T17:hya_1786871239181.jpg",
+      "width": 175,
+      "height": 220
+    },
+    {
+      "name": "shenniang_hoshiguma_dojo",
+      "file": "shenniang_hoshiguma_dojo_1.png",
+      "source": "local_20260816T17:hya_1786871239826.jpg",
+      "width": 175,
+      "height": 225
+    },
+    {
+      "name": "shenniang_hoshiguma_dojo",
+      "file": "shenniang_hoshiguma_dojo_2.png",
+      "source": "local_20260816T17:hya_1786871240563.jpg",
+      "width": 175,
+      "height": 230
+    },
+    {
+      "name": "fengyangjun",
+      "file": "fengyangjun_0.png",
+      "source": "local_20260816T17:hya_1786871248295.jpg",
+      "width": 350,
+      "height": 260
+    },
+    {
+      "name": "fengyangjun",
+      "file": "fengyangjun_1.png",
+      "source": "local_20260816T17:hya_1786871248958.jpg",
+      "width": 370,
+      "height": 260
+    },
+    {
+      "name": "fengyangjun",
+      "file": "fengyangjun_2.png",
+      "source": "local_20260816T17:hya_1786871249620.jpg",
+      "width": 385,
+      "height": 260
+    },
+    {
+      "name": "xinyou_inugami",
+      "file": "xinyou_inugami_0.png",
+      "source": "local_20260816T17:hya_1786871176114.jpg",
+      "width": 190,
+      "height": 210
+    },
+    {
+      "name": "xinyou_inugami",
+      "file": "xinyou_inugami_1.png",
+      "source": "local_20260816T17:hya_1786871177388.jpg",
+      "width": 230,
+      "height": 215
+    },
+    {
+      "name": "xinyou_inugami",
+      "file": "xinyou_inugami_2.png",
+      "source": "local_20260816T17:hya_1786871178077.jpg",
+      "width": 230,
+      "height": 215
+    },
+    {
+      "name": "longjue",
+      "file": "longjue_0.png",
+      "source": "public_longjue:frame_05621.500.jpg",
+      "width": 320,
+      "height": 340
+    },
+    {
+      "name": "longjue",
+      "file": "longjue_1.png",
+      "source": "public_longjue:frame_05622.000.jpg",
+      "width": 330,
+      "height": 340
+    },
+    {
+      "name": "longjue",
+      "file": "longjue_2.png",
+      "source": "public_longjue:frame_05622.500.jpg",
+      "width": 330,
+      "height": 345
+    },
+    {
+      "name": "longjue",
+      "file": "longjue_3.png",
+      "source": "public_longjue:frame_05623.000.jpg",
+      "width": 335,
+      "height": 350
+    },
+    {
+      "name": "yaoyin_kinnara",
+      "file": "yaoyin_kinnara_0.png",
+      "source": "public_yaoyin:frame_06058.500.jpg",
+      "width": 330,
+      "height": 345
+    },
+    {
+      "name": "yaoyin_kinnara",
+      "file": "yaoyin_kinnara_1.png",
+      "source": "public_yaoyin:frame_06059.000.jpg",
+      "width": 330,
+      "height": 345
+    },
+    {
+      "name": "yaoyin_kinnara",
+      "file": "yaoyin_kinnara_2.png",
+      "source": "public_yaoyin:frame_06061.000.jpg",
+      "width": 330,
+      "height": 345
+    },
+    {
+      "name": "yaoyin_kinnara",
+      "file": "yaoyin_kinnara_3.png",
+      "source": "public_yaoyin:frame_06062.000.jpg",
+      "width": 325,
+      "height": 345
+    },
+    {
+      "name": "mengyin_kocho",
+      "file": "mengyin_kocho_0.png",
+      "source": "public_mengyin:frame_03458.000.jpg",
+      "width": 330,
+      "height": 325
+    },
+    {
+      "name": "mengyin_kocho",
+      "file": "mengyin_kocho_1.png",
+      "source": "public_mengyin:frame_03458.500.jpg",
+      "width": 330,
+      "height": 325
+    },
+    {
+      "name": "mengyin_kocho",
+      "file": "mengyin_kocho_2.png",
+      "source": "public_mengyin:frame_03459.000.jpg",
+      "width": 325,
+      "height": 325
+    },
+    {
+      "name": "shiyue_kyuketsuhime",
+      "file": "shiyue_kyuketsuhime_0.png",
+      "source": "public_shiyue:frame_03472.000.jpg",
+      "width": 325,
+      "height": 300
+    },
+    {
+      "name": "shiyue_kyuketsuhime",
+      "file": "shiyue_kyuketsuhime_1.png",
+      "source": "public_shiyue:frame_03474.500.jpg",
+      "width": 325,
+      "height": 305
+    },
+    {
+      "name": "shiyue_kyuketsuhime",
+      "file": "shiyue_kyuketsuhime_2.png",
+      "source": "public_shiyue:frame_03475.500.jpg",
+      "width": 325,
+      "height": 305
+    },
+    {
+      "name": "shiyue_kyuketsuhime",
+      "file": "shiyue_kyuketsuhime_3.png",
+      "source": "public_shiyue:frame_03476.500.jpg",
+      "width": 320,
+      "height": 305
+    }
+  ]
+}
