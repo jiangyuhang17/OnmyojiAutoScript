@@ -21,6 +21,7 @@ SUPPORTED_NAMES = {
     "taira_no_masakado",
     "xinyou_inugami",
     "yaoyin_kinnara",
+    "yunjian_fugengaku",
 }
 
 

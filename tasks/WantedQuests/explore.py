@@ -91,13 +91,19 @@ class WQExplore(BaseExploration, HighLight):
                     continue
                 # 小怪
                 if self.appear(self.TEMPLATE_GIF) and self.fire(self.TEMPLATE_GIF):
+                    search_fail_cnt = 0
                     explore_only_boss = False
                     logger.info(f'Fight, minions cnt {self.minions_cnt}')
                     continue
                 # 向后拉,寻找怪
                 if search_fail_timer.reached():
                     search_fail_timer.reset()
-                    if self._match_end.stable(self.device.image, refresh_after_stable=True):
+                    search_fail_cnt += 1
+                    reached_end = self._match_end.stable(self.device.image, refresh_after_stable=True)
+                    if reached_end or search_fail_cnt >= 5:
+                        if not reached_end:
+                            logger.warning('Wanted target not found after 5 searches, refresh exploration')
+                        search_fail_cnt = 0
                         _cnt_exploration += 1
                         self.quit_explore()
                         continue

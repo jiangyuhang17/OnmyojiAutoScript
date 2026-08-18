@@ -39,7 +39,7 @@
   "restart": {
     "scheduler": {
       "enable": true,
-      "next_run": "2026-08-16 09:07:48",
+      "next_run": "2026-08-19 09:06:30",
       "priority": 0,
       "success_interval": "01 00:00:00",
       "failure_interval": "01 00:00:00",
@@ -94,7 +94,7 @@
   "area_boss": {
     "scheduler": {
       "enable": true,
-      "next_run": "2026-08-16 07:01:56",
+      "next_run": "2026-08-19 07:02:05",
       "priority": 5,
       "success_interval": "01 00:00:00",
       "failure_interval": "01 00:00:00",
@@ -127,7 +127,7 @@
   "experience_youkai": {
     "scheduler": {
       "enable": true,
-      "next_run": "2026-08-16 08:06:30",
+      "next_run": "2026-08-18 08:04:47",
       "priority": 5,
       "success_interval": "01 00:00:00",
       "failure_interval": "01 00:00:00",
@@ -150,7 +150,7 @@
   "gold_youkai": {
     "scheduler": {
       "enable": true,
-      "next_run": "2026-08-16 08:01:42",
+      "next_run": "2026-08-18 08:04:17",
       "priority": 5,
       "success_interval": "01 00:00:00",
       "failure_interval": "01 00:00:00",
@@ -189,7 +189,7 @@
   "realm_raid": {
     "scheduler": {
       "enable": true,
-      "next_run": "2026-08-16 06:00:58",
+      "next_run": "2026-08-18 06:02:54",
       "priority": 5,
       "success_interval": "01 00:00:00",
       "failure_interval": "01 00:00:00",
@@ -225,7 +225,7 @@
   "ryou_toppa": {
     "scheduler": {
       "enable": true,
-      "next_run": "2026-08-16 08:16:13",
+      "next_run": "2026-08-18 08:16:00",
       "priority": 5,
       "success_interval": "01 00:00:00",
       "failure_interval": "01 00:00:00",
@@ -261,7 +261,7 @@
   "kekkai_utilize": {
     "scheduler": {
       "enable": true,
-      "next_run": "2026-08-15 14:42:42",
+      "next_run": "2026-08-19 02:10:00",
       "priority": 2,
       "success_interval": "00 06:00:00",
       "failure_interval": "00 06:00:00",
@@ -286,7 +286,7 @@
   "kekkai_activation": {
     "scheduler": {
       "enable": true,
-      "next_run": "2026-08-15 21:42:26",
+      "next_run": "2026-08-19 05:57:26",
       "priority": 2,
       "success_interval": "01 00:00:00",
       "failure_interval": "00 10:00:00",
@@ -307,7 +307,7 @@
   "demon_encounter": {
     "scheduler": {
       "enable": true,
-      "next_run": "2026-08-15 17:13:12",
+      "next_run": "2026-08-18 17:14:49",
       "priority": 2,
       "success_interval": "01 00:00:00",
       "failure_interval": "01 00:00:00",
@@ -379,7 +379,7 @@
   "daily_trifles": {
     "scheduler": {
       "enable": true,
-      "next_run": "2026-08-16 08:46:12",
+      "next_run": "2026-08-18 08:47:42",
       "priority": 5,
       "success_interval": "01 00:00:00",
       "failure_interval": "01 00:00:00",
@@ -401,7 +401,7 @@
   "talisman_pass": {
     "scheduler": {
       "enable": true,
-      "next_run": "2026-08-15 17:30:25",
+      "next_run": "2026-08-18 17:31:26",
       "priority": 5,
       "success_interval": "00 06:00:00",
       "failure_interval": "00 06:00:00",
@@ -448,7 +448,7 @@
   "delegation": {
     "scheduler": {
       "enable": true,
-      "next_run": "2026-08-16 07:17:47",
+      "next_run": "2026-08-18 07:15:24",
       "priority": 5,
       "success_interval": "01 00:00:00",
       "failure_interval": "01 00:00:00",
@@ -519,7 +519,7 @@
   "wanted_quests": {
     "scheduler": {
       "enable": true,
-      "next_run": "2026-08-16 09:31:44",
+      "next_run": "2026-08-18 09:30:48",
       "priority": 5,
       "success_interval": "01 00:00:00",
       "failure_interval": "01 00:00:00",
@@ -547,7 +547,7 @@
   "tako": {
     "scheduler": {
       "enable": true,
-      "next_run": "2026-08-16 10:00:10",
+      "next_run": "2026-08-18 10:02:32",
       "priority": 5,
       "success_interval": "01 00:00:00",
       "failure_interval": "01 00:00:00",
@@ -601,7 +601,8 @@
       "layer": "悲鸣",
       "limit_time": "00:30:00",
       "limit_count": 30,
-      "soul_buff_enable": false
+      "soul_buff_enable": false,
+      "check_true_orochi_enable": false
     },
     "invite_config": {
       "invite_number": "one",
@@ -903,7 +904,7 @@
   "float_parade": {
     "scheduler": {
       "enable": true,
-      "next_run": "2026-08-16 17:32:45",
+      "next_run": "2026-08-18 17:32:29",
       "priority": 5,
       "success_interval": "03 00:00:00",
       "failure_interval": "03 00:00:00",
@@ -1297,6 +1298,7 @@
     },
     "thousand_things": {
       "enable": false,
+      "earn_money": false,
       "mystery_amulet": false,
       "black_daruma_fragment": false,
       "ap": false
@@ -1312,6 +1314,7 @@
       "demon_class": "土蜘蛛",
       "demon_position": 1,
       "picture_book_scrap": 30,
+      "enable_book_auto": false,
       "picture_book_rule": "auto"
     },
     "bondlings": {
@@ -1337,7 +1340,7 @@
   "secret": {
     "scheduler": {
       "enable": true,
-      "next_run": "2026-08-16 10:30:53",
+      "next_run": "2026-08-18 10:31:15",
       "priority": 5,
       "success_interval": "07 00:00:00",
       "failure_interval": "07 00:00:00",
@@ -1467,7 +1470,7 @@
   "hunt": {
     "scheduler": {
       "enable": true,
-      "next_run": "2026-08-15 17:17:37",
+      "next_run": "2026-08-18 07:05:28",
       "priority": 5,
       "success_interval": "01 00:00:00",
       "failure_interval": "01 00:00:00",

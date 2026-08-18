@@ -58,19 +58,18 @@ class ScriptTask(GameUi, GeneralBattle, SwitchSoul, SecretAssets):
         # 进入
         success = True
         self.ui_click(self.I_SE_ENTER, self.I_SE_FIRE)
-        time.sleep(1)  # 有一个很傻逼的动画
-        self.screenshot()
-        entered_prepare = self.is_in_prepare(False)
-        if entered_prepare:
-            logger.warning('Secret zone battle preparation opened early, take over battle')
-        elif not self.appear(self.I_SE_PLACEMENT):
+        time.sleep(1)  # Wait for the entry animation.
+        entry_state = self.wait_entry_state()
+        if entry_state == 'battle':
+            logger.warning('Secret zone battle opened early, take over battle')
+        elif entry_state == 'unknown':
             logger.warning('Unsuccessful entry. You must have entered the secret zone before.')
             success = False
 
         # 开始
         logger.info('Start secret zone')
         first_battle = True
-        if entered_prepare:
+        if entry_state == 'battle':
             buff = []
             if con.secret_gold_50:
                 buff.append(BuffClass.GOLD_50)
@@ -157,6 +156,18 @@ class ScriptTask(GameUi, GeneralBattle, SwitchSoul, SecretAssets):
             self.close_buff()
         self.set_next_run(task='Secret', success=True, finish=True)
         raise TaskEnd('Secret')
+
+    def wait_entry_state(self, timeout: float = 10) -> str:
+        """Wait until secret-zone entry reaches a challenge page or a battle."""
+        timer = Timer(timeout).start()
+        while 1:
+            self.screenshot()
+            if self.is_in_battle(False) or self.is_in_prepare(False):
+                return 'battle'
+            if self.appear(self.I_SE_PLACEMENT):
+                return 'zones'
+            if timer.reached():
+                return 'unknown'
 
     def find_battle(self, screenshot: bool = False) -> int or None:
         """

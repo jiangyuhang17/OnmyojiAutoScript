@@ -60,6 +60,8 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
         self.screenshot()
         number_challenge = self.O_WQ_NUMBER.ocr(self.device.image)
         error_count = 0
+        last_progress = None
+        stalled_count = 0
         while 1:
             self.screenshot()
             if not self.is_wq_remained():
@@ -77,8 +79,8 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
                 logger.warning('failed too many times, exit')
                 break
             if self.current_count >= 30:
-                logger.error(f'current count {self.current_count} >= 20, exit')
-                raise Exception('current count >= 20, exit')
+                logger.warning(f'Current battle count {self.current_count} >= 30, stop wanted quests')
+                break
             cu, re, total, area = self.find_wq(self.device.image)
             logger.info(f"find_wq result: current {cu} remain {re} total {total} area {area}")
             if re == -2:
@@ -92,6 +94,17 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
                 continue
             # 找到任务,执行
             error_count = 0
+            progress = (tuple(round(value) for value in area), cu, total)
+            if progress == last_progress:
+                stalled_count += 1
+            else:
+                last_progress = progress
+                stalled_count = 0
+            if stalled_count >= 3:
+                logger.warning(
+                    f'Wanted quest progress stayed at {cu}/{total} for 3 attempts, stop this run'
+                )
+                break
             self.O_WQ_TEXT_ALL.area = area
             self.execute_mission(self.O_WQ_TEXT_ALL, total - cu, number_challenge)
             sleep(1.5)

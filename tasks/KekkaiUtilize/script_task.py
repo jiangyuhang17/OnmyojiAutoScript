@@ -624,7 +624,7 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
 
                 # 跳过无效结界卡（类型未知或数值异常）
                 if card_type == 'unknown' or card_value <= 0 or card_type not in RESOURCE_CONFIG:
-                    logger.info(f'⏭️ 跳过无效卡: {card_type}@{card_value}')
+                    logger.info(f'Skip invalid card: {card_type}@{card_value}')
                     continue
 
                 # ====== 模式分支处理 ======#

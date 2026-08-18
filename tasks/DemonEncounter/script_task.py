@@ -35,6 +35,15 @@ class LanternClass(Enum):
 class ScriptTask(GameUi, GeneralBattle, DemonEncounterAssets, SwitchSoul):
     conf: DemonEncounter = None
 
+    def _clear_pending_battle_reward(self) -> bool:
+        """Clear a reward screen left behind by a lantern battle."""
+        for reward in (self.I_REWARD, self.I_REWARD_GOLD):
+            if self.appear(reward):
+                logger.info('Clear pending lantern battle reward')
+                self.ui_click_until_disappear(reward)
+                return True
+        return False
+
     def run(self):
         self.conf = self.config.demon_encounter
         if not self.check_time():
@@ -81,6 +90,8 @@ class ScriptTask(GameUi, GeneralBattle, DemonEncounterAssets, SwitchSoul):
             timer_find_boss.start()
             while 1:
                 self.screenshot()
+                if self._clear_pending_battle_reward():
+                    continue
                 if self.appear(self.I_BOSS_FIRE) or self.appear(self.I_BEST_BOSS_FIRE):
                     break
                 if timer_find_boss.reached():
@@ -91,8 +102,9 @@ class ScriptTask(GameUi, GeneralBattle, DemonEncounterAssets, SwitchSoul):
                     # 没找到boss但地图中央出现宝箱，导致点击宝箱出现50勾玉购买界面
                     self.ui_click_until_smt_disappear(self.I_DE_FIND, self.I_JADE_50, interval=1)
                     continue
-                if find_btn_clicked and self.click(self.C_DM_BOSS_CLICK, interval=5):
-                    find_btn_clicked = False
+                if find_btn_clicked:
+                    if self.click(self.C_DM_BOSS_CLICK, interval=5):
+                        logger.info('Retry entering found boss...')
                     continue
                 if self.best_demon_enable:
                     self.device.click_record_clear()

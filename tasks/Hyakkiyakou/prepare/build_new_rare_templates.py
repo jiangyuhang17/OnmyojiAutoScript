@@ -42,6 +42,10 @@ SOURCES = {
         "directory": ROOT / "log" / "hya" / "20260816T17",
         "background": None,
     },
+    "local_20260816T22": {
+        "directory": ROOT / "log" / "hya" / "20260816T22",
+        "background": None,
+    },
     "public_20260814": {
         "directory": PUBLIC_ROOT / "targets" / "ssr" / "taira_no_masakado",
         "background": PUBLIC_ROOT / "events" / "event_0277_07751.744.jpg",
@@ -108,6 +112,26 @@ ANNOTATIONS = {
         Annotation("local", "hya_1786808440713.jpg", (795, 245, 1125, 585)),
         Annotation("local", "hya_1786808441216.jpg", (715, 245, 1045, 585)),
         Annotation("local", "hya_1786808442193.jpg", (545, 245, 900, 585)),
+    ],
+    "yunjian_fugengaku": [
+        Annotation(
+            "local_20260816T22",
+            "hya_1786890140614.jpg",
+            (700, 325, 1010, 600),
+            ((760, 330, 980, 535),),
+        ),
+        Annotation(
+            "local_20260816T22",
+            "hya_1786890141178.jpg",
+            (570, 325, 900, 600),
+            ((650, 330, 880, 535),),
+        ),
+        Annotation(
+            "local_20260816T22",
+            "hya_1786890152869.jpg",
+            (695, 325, 975, 600),
+            ((725, 330, 960, 535),),
+        ),
     ],
     "taira_no_masakado": [
         Annotation("local_20260816T17", "hya_1786871038237.jpg", (535, 215, 865, 565)),

@@ -27,6 +27,38 @@ def switch_parser(switch_str: str) -> tuple:
 
 class SwitchSoul(BaseTask, SwitchSoulAssets):
 
+    def _wait_and_confirm_soul_switch(self, timeout: float = 4) -> bool:
+        """Wait for the preset confirmation dialog and close it."""
+        timeout_timer = Timer(timeout).start()
+        dialog_seen = False
+        while 1:
+            self.screenshot()
+            if self.appear_then_click(self.I_CHECK_BLOCK, interval=0.8):
+                continue
+            if self.appear(self.I_SOU_SWITCH_SURE):
+                dialog_seen = True
+                self.appear_then_click(self.I_SOU_SWITCH_SURE, interval=0.8)
+                continue
+            if dialog_seen:
+                return True
+            if timeout_timer.reached():
+                return False
+            sleep(0.2)
+
+    def _switch_soul_team(self, target_team, attempts: int = 3) -> bool:
+        """Select one team without reopening its confirmation dialog."""
+        for _ in range(attempts):
+            self.screenshot()
+            if self.appear(self.I_SOU_SWITCH_SURE):
+                if self._wait_and_confirm_soul_switch():
+                    return True
+                continue
+            if not self.appear_then_click(target_team, interval=0.8):
+                continue
+            if self._wait_and_confirm_soul_switch():
+                return True
+        return False
+
     def goto_shikigami_records(self, button):
         """
         进入式神录
@@ -151,22 +183,8 @@ class SwitchSoul(BaseTask, SwitchSoulAssets):
             sleep(0.5)
         # 点击队伍
         target_team = get_team_asset(team)
-        for i in range(3):
-            sleep(0.8)
-            self.screenshot()
-            if self.appear(self.I_SOU_SWITCH_SURE):
-                while 1:
-                    self.click(self.I_SOU_SWITCH_SURE, 3)
-                    self.screenshot()
-                    if self.appear_then_click(self.I_CHECK_BLOCK, 3):
-                        continue
-                    if not self.appear(self.I_SOU_SWITCH_SURE):
-                        break
-                continue
-            if not self.appear_then_click(target_team, interval=3):
-                logger.warning(f'Click team {team} failed in group {group}')
-        # 兜底若还出现确认按钮则点击
-        self.ui_click_until_disappear(self.I_SOU_SWITCH_SURE)
+        if not self._switch_soul_team(target_team):
+            logger.warning(f'Click team {team} failed in group {group}')
         logger.info(f'Switch soul_one group {group} team {team}')
 
     def switch_souls(self, target: tuple or list[tuple]) -> None:

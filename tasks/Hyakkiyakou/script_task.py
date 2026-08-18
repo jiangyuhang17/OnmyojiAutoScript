@@ -195,6 +195,8 @@ class ScriptTask(GameUi, HyaSlave, SwitchOnmyoji):
         # 这里 response 随便给一个默认值即可，主线战斗里是 last_action
         tracks = list(self.tracker(image=self.device.image, response=[0, 0, False, 10]))
         tracks.extend(self.new_rare_recognizer(image=self.device.image))
+        if self._config.debug_config.continuous_learning:
+            self.debugger.deal_learning(image=self.device.image, tracks=tracks)
         best_score = -1
         best_class = -1
         for _id, _class, _conf, _cx, _cy, _w, _h, _v in tracks:
