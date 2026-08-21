@@ -46,6 +46,30 @@ SOURCES = {
         "directory": ROOT / "log" / "hya" / "20260816T22",
         "background": None,
     },
+    "local_20260819T03": {
+        "directory": ROOT / "log" / "hya" / "20260819T03",
+        "background": None,
+    },
+    "local_20260820T04": {
+        "directory": ROOT / "log" / "hya" / "20260820T04",
+        "background": None,
+    },
+    "local_20260820T23": {
+        "directory": ROOT / "log" / "hya" / "20260820T23",
+        "background": None,
+    },
+    "local_20260821T03": {
+        "directory": ROOT / "log" / "hya" / "20260821T03",
+        "background": None,
+    },
+    "local_20260821T04": {
+        "directory": ROOT / "log" / "hya" / "20260821T04",
+        "background": None,
+    },
+    "local_20260821T05": {
+        "directory": ROOT / "log" / "hya" / "20260821T05",
+        "background": None,
+    },
     "public_20260814": {
         "directory": PUBLIC_ROOT / "targets" / "ssr" / "taira_no_masakado",
         "background": PUBLIC_ROOT / "events" / "event_0277_07751.744.jpg",
@@ -97,6 +121,110 @@ SOURCES = {
 
 # Coordinates are target-only regions in normalized 1280x720 captures.
 ANNOTATIONS = {
+    "fuso_kozen": [
+        Annotation("local_20260821T05", "hya_1787260314501.jpg", (1090, 280, 1280, 610)),
+        Annotation("local_20260821T05", "hya_1787260316128.jpg", (900, 275, 1190, 610)),
+        Annotation("local_20260821T05", "hya_1787260317563.jpg", (690, 275, 1000, 610)),
+        Annotation("local_20260821T05", "hya_1787260323094.jpg", (125, 270, 465, 610)),
+    ],
+    "himiko": [
+        Annotation("local_20260821T03", "hya_1787254437297.jpg", (1000, 245, 1280, 600)),
+        Annotation("local_20260821T03", "hya_1787254438817.jpg", (630, 245, 1010, 600)),
+        Annotation("local_20260821T03", "hya_1787254440417.jpg", (330, 245, 765, 600)),
+        Annotation("local_20260821T03", "hya_1787254441997.jpg", (60, 245, 515, 600)),
+    ],
+    "mengshan_shiro": [
+        Annotation("local_20260821T04", "hya_1787256929456.jpg", (980, 250, 1280, 610)),
+        Annotation("local_20260821T04", "hya_1787256930942.jpg", (760, 245, 1060, 610)),
+    ],
+    "tianhuo_suzuhikohime": [
+        Annotation("local_20260821T04", "hya_1787257278204.jpg", (775, 280, 1060, 600)),
+        Annotation("local_20260821T04", "hya_1787257279436.jpg", (525, 275, 780, 600)),
+        Annotation("local_20260821T04", "hya_1787257280751.jpg", (250, 270, 540, 600)),
+    ],
+    "yuki_gozen": [
+        Annotation("local_20260821T04", "hya_1787256704904.jpg", (960, 260, 1280, 610)),
+        Annotation("local_20260821T04", "hya_1787256707061.jpg", (590, 260, 940, 610)),
+        Annotation("local_20260821T04", "hya_1787256709370.jpg", (220, 260, 560, 610)),
+    ],
+    "shikinshin": [
+        Annotation(
+            "local_20260820T23",
+            "hya_1787239018415.jpg",
+            (895, 295, 1160, 575),
+            ((910, 315, 1145, 540),),
+        ),
+        Annotation(
+            "local_20260820T23",
+            "hya_1787239019473.jpg",
+            (685, 295, 980, 575),
+            ((705, 315, 965, 540),),
+        ),
+        Annotation(
+            "local_20260820T23",
+            "hya_1787239020522.jpg",
+            (565, 295, 810, 575),
+            ((585, 315, 795, 540),),
+        ),
+        Annotation(
+            "local_20260820T23",
+            "hya_1787239021711.jpg",
+            (390, 295, 715, 575),
+            ((410, 315, 655, 540),),
+        ),
+    ],
+    "kuzuha": [
+        Annotation(
+            "local_20260820T04",
+            "hya_1787169966513.jpg",
+            (480, 285, 765, 595),
+            ((495, 305, 735, 575),),
+        ),
+        Annotation(
+            "local_20260820T04",
+            "hya_1787169967187.jpg",
+            (305, 285, 675, 595),
+            ((325, 305, 600, 575),),
+        ),
+        Annotation(
+            "local_20260820T04",
+            "hya_1787169967921.jpg",
+            (185, 285, 565, 595),
+            ((205, 305, 485, 575),),
+        ),
+    ],
+    "ichikami": [
+        Annotation(
+            "local_20260819T03",
+            "hya_1787080150148.jpg",
+            (955, 325, 1215, 610),
+            ((975, 335, 1190, 600),),
+        ),
+        Annotation(
+            "local_20260819T03",
+            "hya_1787080150696.jpg",
+            (885, 325, 1165, 610),
+            ((900, 335, 1140, 600),),
+        ),
+        Annotation(
+            "local_20260819T03",
+            "hya_1787080151685.jpg",
+            (735, 325, 1000, 610),
+            ((750, 335, 975, 600),),
+        ),
+        Annotation(
+            "local_20260819T03",
+            "hya_1787080152205.jpg",
+            (635, 325, 905, 610),
+            ((650, 335, 880, 600),),
+        ),
+        Annotation(
+            "local_20260819T03",
+            "hya_1787080153090.jpg",
+            (500, 325, 735, 610),
+            ((510, 335, 710, 600),),
+        ),
+    ],
     "arakuro": [
         Annotation("local", "hya_1786808142237.jpg", (745, 215, 990, 545)),
         Annotation("local", "hya_1786808143012.jpg", (585, 215, 890, 550)),
@@ -226,6 +354,30 @@ ANNOTATIONS = {
         Annotation("local_20260816T17", "hya_1786871176114.jpg", (425, 365, 615, 575)),
         Annotation("local_20260816T17", "hya_1786871177388.jpg", (220, 365, 450, 580)),
         Annotation("local_20260816T17", "hya_1786871178077.jpg", (115, 365, 345, 580)),
+        Annotation(
+            "local_20260819T03",
+            "hya_1787081294876.jpg",
+            (1045, 345, 1280, 605),
+            ((1060, 355, 1275, 595),),
+        ),
+        Annotation(
+            "local_20260819T03",
+            "hya_1787081295446.jpg",
+            (960, 345, 1220, 605),
+            ((975, 355, 1205, 595),),
+        ),
+        Annotation(
+            "local_20260819T03",
+            "hya_1787081296262.jpg",
+            (795, 345, 1035, 605),
+            ((810, 355, 1020, 595),),
+        ),
+        Annotation(
+            "local_20260819T03",
+            "hya_1787081297762.jpg",
+            (530, 345, 765, 605),
+            ((545, 355, 750, 595),),
+        ),
     ],
     "longjue": [
         Annotation(

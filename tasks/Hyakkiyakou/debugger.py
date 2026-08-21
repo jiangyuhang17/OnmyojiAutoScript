@@ -87,7 +87,6 @@ class Debugger:
                  hya_save_result: bool = False):
         self._reset_thread_env()
         Debugger.info_enable = info_enable
-        self.images_cache: dict = {}
         self._last_learning_capture = 0.0
         self.continuous_learning = continuous_learning
         self.hya_save_result = hya_save_result
@@ -161,16 +160,16 @@ class Debugger:
             logger.warning('Failed to encode Hyakkiyakou learning image')
             return
         time_now_image_name = f'hya_{int(time.time() * 1000)}'
-        self.images_cache[time_now_image_name] = encoded
+        save_file = self.hya_save_folder / f'{time_now_image_name}.jpg'
+        try:
+            encoded.tofile(save_file)
+        except OSError as e:
+            logger.warning(f'Failed to save Hyakkiyakou learning image: {e}')
 
     def save_images(self):
-        if not self.images_cache:
-            self.images_cache: dict = {}
-            return
-        logger.info('OAS Track Debugger save images to train model')
-        for image_name, encoded in self.images_cache.items():
-            encoded.tofile(self.hya_save_folder / f'{image_name}.jpg')
-        self.images_cache.clear()
+        # Learning frames are persisted by deal_learning so an interrupted run
+        # cannot discard the current battle's captures.
+        return
 
     def save_result(self, image):
         if not self.hya_save_result:

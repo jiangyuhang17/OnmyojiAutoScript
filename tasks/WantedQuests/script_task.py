@@ -348,13 +348,19 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
         best_type, destination, once_number, goto_button, func, _ = info_wq_list[0]
         do_number = 1 if once_number >= num_want else num_want // once_number + (1 if num_want % once_number > 0 else 0)
         try:
-            func(goto_button, do_number)
+            if func(goto_button, do_number) is False:
+                logger.warning(f'Wanted quest route unavailable: {destination}')
+                self.want_strategy_excluding.append(info_wq_list[0])
         except ExploreWantedBoss:
             logger.warning('The extreme case. The quest only needs to challenge one final boss, so skip it')
             self.want_strategy_excluding.append(info_wq_list[0])
 
     def challenge(self, goto_btn, num):
-        self.ui_click(goto_btn, self.I_WQC_FIRE)
+        if not self.ui_click(goto_btn, self.I_WQC_FIRE, timeout=12):
+            logger.warning('Wanted challenge entry did not open, return to exploration')
+            self.ui_get_current_page()
+            self.ui_goto(page_exploration)
+            return False
         self.ui_click(self.I_WQC_UNLOCK, self.I_WQC_LOCK)
         self.ui_click_until_disappear(self.I_WQC_FIRE)
         # 锁定阵容进入战斗
@@ -368,6 +374,7 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
                 break
             if self.appear_then_click(self.I_UI_BACK_YELLOW, interval=1.5):
                 continue
+        return True
 
     def secret(self, goto, num=1):
         self.ui_click(goto, self.I_WQSE_FIRE)

@@ -187,5 +187,14 @@
     "method": "Template matching",
     "threshold": 0.8,
     "description": "斗技荣誉图标"
+  },
+  {
+    "itemName": "season_trial_notice",
+    "imageName": "duel_season_trial_notice.png",
+    "roiFront": "470,345,450,120",
+    "roiBack": "430,320,520,180",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "Season team trial notice"
   }
 ]

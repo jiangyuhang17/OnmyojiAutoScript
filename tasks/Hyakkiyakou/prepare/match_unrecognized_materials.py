@@ -90,6 +90,7 @@ def main() -> None:
     )
     parser.add_argument("--sample-count", type=int, default=24)
     parser.add_argument("--batch-size", type=int, default=32)
+    parser.add_argument("--top-k", type=int, default=10)
     args = parser.parse_args()
 
     try:
@@ -112,7 +113,7 @@ def main() -> None:
 
     matches = {}
     for class_index, name in enumerate(names):
-        values, indexes = similarities[class_index].topk(min(10, len(candidate_paths)))
+        values, indexes = similarities[class_index].topk(min(args.top_k, len(candidate_paths)))
         matches[name] = [
             {
                 "candidate_id": int(candidate_index),

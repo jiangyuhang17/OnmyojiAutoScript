@@ -1,8 +1,11 @@
 import unittest
+from types import SimpleNamespace
+from unittest.mock import Mock
 
 from oashya.labels import CLASSINDEX as CI
 
 from tasks.Hyakkiyakou.agent.agent import Agent
+from tasks.Hyakkiyakou.script_task import ScriptTask
 from tasks.Hyakkiyakou.slave.hya_slave import HyaBuff
 
 
@@ -112,6 +115,44 @@ class HyakkiyakouAgentTest(unittest.TestCase):
 
         self.assertEqual(action[:2], [0, 0])
         self.assertTrue(action[2])
+
+    def test_rare_target_uses_two_click_burst(self):
+        focus = SimpleNamespace(_class=self.ssr, _cx=900)
+
+        self.assertEqual(ScriptTask._action_click_count(focus, self.empty_state), 2)
+
+    def test_buff_target_uses_single_click(self):
+        focus = SimpleNamespace(_class=CI.BUFF_006, _cx=900)
+
+        self.assertEqual(ScriptTask._action_click_count(focus, self.empty_state), 1)
+
+    def test_rare_target_on_left_uses_single_click(self):
+        focus = SimpleNamespace(_class=self.sp, _cx=479)
+
+        self.assertEqual(ScriptTask._action_click_count(focus, self.empty_state), 1)
+
+    def test_rare_target_uses_single_click_when_beans_are_low(self):
+        focus = SimpleNamespace(_class=self.sp, _cx=900)
+        low_bean_state = [15, 36, 10] + [HyaBuff.BUFF_STATE0] * 4
+
+        self.assertEqual(ScriptTask._action_click_count(focus, low_bean_state), 1)
+
+    def test_rare_burst_clicks_twice_and_reports_total_beans(self):
+        action = [900, 360, True, 10]
+        fast_click = Mock()
+        task = SimpleNamespace(
+            agent=SimpleNamespace(focus=SimpleNamespace(_class=self.sp, _cx=900)),
+            _config=SimpleNamespace(
+                debug_config=SimpleNamespace(hya_control_method='minitouch')
+            ),
+            fast_click=fast_click,
+            _action_click_count=ScriptTask._action_click_count,
+        )
+
+        ScriptTask.do_action(task, action, self.empty_state)
+
+        self.assertEqual(fast_click.call_count, 2)
+        self.assertEqual(action[3], 20)
 
 
 if __name__ == '__main__':

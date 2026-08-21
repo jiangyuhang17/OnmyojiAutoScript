@@ -76,6 +76,9 @@ class ScriptTask(GameUi, GeneralBattle, SwitchSoul, DuelAssets, SwitchOnmyoji):
             self.ui_goto_page(page_onmyodo)
             self.switch_onmyoji(self.conf.duel_config.switch_onmyoji)
         self.ui_goto_page(page_duel)
+        self.screenshot()
+        if self.dismiss_duel_entry_notice():
+            sleep(0.8)
         self.switch_all_soul()
         self.current_score = self.conf.duel_celeb_config.initial_score
 
@@ -290,6 +293,8 @@ class ScriptTask(GameUi, GeneralBattle, SwitchSoul, DuelAssets, SwitchOnmyoji):
             self.screenshot()
             if click_count >= 3:
                 break
+            if self.dismiss_duel_entry_notice():
+                continue
             if self.appear_then_click(self.I_D_TEAM, interval=1):
                 continue
             if self.appear_then_click(self.I_UI_CONFIRM, interval=0.6):
@@ -304,6 +309,12 @@ class ScriptTask(GameUi, GeneralBattle, SwitchSoul, DuelAssets, SwitchOnmyoji):
             logger.info('Dismiss duel locked-team dialog')
         logger.info('Souls Switch is complete')
         self.ui_click(self.I_UI_BACK_YELLOW, self.I_D_TEAM)
+
+    def dismiss_duel_entry_notice(self) -> bool:
+        if not self.appear_then_click(self.I_SEASON_TRIAL_NOTICE, interval=1):
+            return False
+        logger.info('Dismiss duel season team trial notice')
+        return True
 
     def check_and_get_reward(self):
         """检查并收获奖励"""

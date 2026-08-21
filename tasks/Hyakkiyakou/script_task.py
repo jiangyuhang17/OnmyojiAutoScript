@@ -49,6 +49,9 @@ def plot_save(image, boxes):
 
 class ScriptTask(GameUi, HyaSlave, SwitchOnmyoji):
 
+    RARE_BURST_COUNT = 2
+    RARE_BURST_MIN_X = 480
+
     @property
     def _config(self):
         return self.config.hyakkiyakou
@@ -318,7 +321,22 @@ class ScriptTask(GameUi, HyaSlave, SwitchOnmyoji):
             return
         if state[0] <= 0:
             return
-        self.fast_click(x=x, y=y, control_method=self._config.debug_config.hya_control_method)
+        click_count = self._action_click_count(self.agent.focus, state)
+        action[3] = bean * click_count
+        for _ in range(click_count):
+            self.fast_click(x=x, y=y, control_method=self._config.debug_config.hya_control_method)
+
+    @classmethod
+    def _action_click_count(cls, focus, state: list) -> int:
+        if focus is None or not Agent.is_ssr_or_sp(focus._class):
+            return 1
+        if focus._cx < cls.RARE_BURST_MIN_X:
+            return 1
+
+        bean_per_click = state[2] if len(state) > 2 else 10
+        if state[0] < bean_per_click * cls.RARE_BURST_COUNT:
+            return 1
+        return cls.RARE_BURST_COUNT
 
 
 if __name__ == '__main__':

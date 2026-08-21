@@ -60,6 +60,8 @@ class DuelAssets:
 	I_D_CHECK_BAN = RuleImage(roi_front=(611,36,56,62), roi_back=(590,14,100,100), threshold=0.8, method="Template matching", file="./tasks/Duel/duel/duel_d_check_ban.png")
 	# 斗技荣誉图标 
 	I_DUEL_HONOR = RuleImage(roi_front=(211,636,20,20), roi_back=(200,601,130,100), threshold=0.8, method="Template matching", file="./tasks/Duel/duel/duel_duel_honor.png")
+	# Season team trial notice
+	I_SEASON_TRIAL_NOTICE = RuleImage(roi_front=(470,345,450,120), roi_back=(430,320,520,180), threshold=0.8, method="Template matching", file="./tasks/Duel/duel/duel_season_trial_notice.png")
 
 
 	# Ocr Rule Assets

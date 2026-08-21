@@ -3,6 +3,202 @@
   "threshold": 0.85,
   "templates": [
     {
+      "name": "fuso_kozen",
+      "file": "fuso_kozen_0.png",
+      "source": "local_20260821T05:hya_1787260314501.jpg",
+      "width": 190,
+      "height": 330
+    },
+    {
+      "name": "fuso_kozen",
+      "file": "fuso_kozen_1.png",
+      "source": "local_20260821T05:hya_1787260316128.jpg",
+      "width": 290,
+      "height": 335
+    },
+    {
+      "name": "fuso_kozen",
+      "file": "fuso_kozen_2.png",
+      "source": "local_20260821T05:hya_1787260317563.jpg",
+      "width": 310,
+      "height": 335
+    },
+    {
+      "name": "fuso_kozen",
+      "file": "fuso_kozen_3.png",
+      "source": "local_20260821T05:hya_1787260323094.jpg",
+      "width": 340,
+      "height": 340
+    },
+    {
+      "name": "himiko",
+      "file": "himiko_0.png",
+      "source": "local_20260821T03:hya_1787254437297.jpg",
+      "width": 280,
+      "height": 355
+    },
+    {
+      "name": "himiko",
+      "file": "himiko_1.png",
+      "source": "local_20260821T03:hya_1787254438817.jpg",
+      "width": 380,
+      "height": 355
+    },
+    {
+      "name": "himiko",
+      "file": "himiko_2.png",
+      "source": "local_20260821T03:hya_1787254440417.jpg",
+      "width": 435,
+      "height": 355
+    },
+    {
+      "name": "himiko",
+      "file": "himiko_3.png",
+      "source": "local_20260821T03:hya_1787254441997.jpg",
+      "width": 455,
+      "height": 355
+    },
+    {
+      "name": "mengshan_shiro",
+      "file": "mengshan_shiro_0.png",
+      "source": "local_20260821T04:hya_1787256929456.jpg",
+      "width": 300,
+      "height": 360
+    },
+    {
+      "name": "mengshan_shiro",
+      "file": "mengshan_shiro_1.png",
+      "source": "local_20260821T04:hya_1787256930942.jpg",
+      "width": 300,
+      "height": 365
+    },
+    {
+      "name": "tianhuo_suzuhikohime",
+      "file": "tianhuo_suzuhikohime_0.png",
+      "source": "local_20260821T04:hya_1787257278204.jpg",
+      "width": 285,
+      "height": 320
+    },
+    {
+      "name": "tianhuo_suzuhikohime",
+      "file": "tianhuo_suzuhikohime_1.png",
+      "source": "local_20260821T04:hya_1787257279436.jpg",
+      "width": 255,
+      "height": 325
+    },
+    {
+      "name": "tianhuo_suzuhikohime",
+      "file": "tianhuo_suzuhikohime_2.png",
+      "source": "local_20260821T04:hya_1787257280751.jpg",
+      "width": 290,
+      "height": 330
+    },
+    {
+      "name": "yuki_gozen",
+      "file": "yuki_gozen_0.png",
+      "source": "local_20260821T04:hya_1787256704904.jpg",
+      "width": 320,
+      "height": 350
+    },
+    {
+      "name": "yuki_gozen",
+      "file": "yuki_gozen_1.png",
+      "source": "local_20260821T04:hya_1787256707061.jpg",
+      "width": 350,
+      "height": 350
+    },
+    {
+      "name": "yuki_gozen",
+      "file": "yuki_gozen_2.png",
+      "source": "local_20260821T04:hya_1787256709370.jpg",
+      "width": 340,
+      "height": 350
+    },
+    {
+      "name": "shikinshin",
+      "file": "shikinshin_0.png",
+      "source": "local_20260820T23:hya_1787239018415.jpg",
+      "width": 265,
+      "height": 280
+    },
+    {
+      "name": "shikinshin",
+      "file": "shikinshin_1.png",
+      "source": "local_20260820T23:hya_1787239019473.jpg",
+      "width": 295,
+      "height": 280
+    },
+    {
+      "name": "shikinshin",
+      "file": "shikinshin_2.png",
+      "source": "local_20260820T23:hya_1787239020522.jpg",
+      "width": 245,
+      "height": 280
+    },
+    {
+      "name": "shikinshin",
+      "file": "shikinshin_3.png",
+      "source": "local_20260820T23:hya_1787239021711.jpg",
+      "width": 325,
+      "height": 280
+    },
+    {
+      "name": "kuzuha",
+      "file": "kuzuha_0.png",
+      "source": "local_20260820T04:hya_1787169966513.jpg",
+      "width": 285,
+      "height": 310
+    },
+    {
+      "name": "kuzuha",
+      "file": "kuzuha_1.png",
+      "source": "local_20260820T04:hya_1787169967187.jpg",
+      "width": 370,
+      "height": 310
+    },
+    {
+      "name": "kuzuha",
+      "file": "kuzuha_2.png",
+      "source": "local_20260820T04:hya_1787169967921.jpg",
+      "width": 380,
+      "height": 310
+    },
+    {
+      "name": "ichikami",
+      "file": "ichikami_0.png",
+      "source": "local_20260819T03:hya_1787080150148.jpg",
+      "width": 260,
+      "height": 285
+    },
+    {
+      "name": "ichikami",
+      "file": "ichikami_1.png",
+      "source": "local_20260819T03:hya_1787080150696.jpg",
+      "width": 280,
+      "height": 285
+    },
+    {
+      "name": "ichikami",
+      "file": "ichikami_2.png",
+      "source": "local_20260819T03:hya_1787080151685.jpg",
+      "width": 265,
+      "height": 285
+    },
+    {
+      "name": "ichikami",
+      "file": "ichikami_3.png",
+      "source": "local_20260819T03:hya_1787080152205.jpg",
+      "width": 270,
+      "height": 285
+    },
+    {
+      "name": "ichikami",
+      "file": "ichikami_4.png",
+      "source": "local_20260819T03:hya_1787080153090.jpg",
+      "width": 235,
+      "height": 285
+    },
+    {
       "name": "arakuro",
       "file": "arakuro_0.png",
       "source": "local:hya_1786808142237.jpg",
@@ -295,6 +491,34 @@
       "source": "local_20260816T17:hya_1786871178077.jpg",
       "width": 230,
       "height": 215
+    },
+    {
+      "name": "xinyou_inugami",
+      "file": "xinyou_inugami_3.png",
+      "source": "local_20260819T03:hya_1787081294876.jpg",
+      "width": 235,
+      "height": 260
+    },
+    {
+      "name": "xinyou_inugami",
+      "file": "xinyou_inugami_4.png",
+      "source": "local_20260819T03:hya_1787081295446.jpg",
+      "width": 260,
+      "height": 260
+    },
+    {
+      "name": "xinyou_inugami",
+      "file": "xinyou_inugami_5.png",
+      "source": "local_20260819T03:hya_1787081296262.jpg",
+      "width": 240,
+      "height": 260
+    },
+    {
+      "name": "xinyou_inugami",
+      "file": "xinyou_inugami_6.png",
+      "source": "local_20260819T03:hya_1787081297762.jpg",
+      "width": 235,
+      "height": 260
     },
     {
       "name": "longjue",
