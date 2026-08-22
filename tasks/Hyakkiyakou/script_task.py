@@ -289,9 +289,22 @@ class ScriptTask(GameUi, HyaSlave, SwitchOnmyoji):
             freeze = self.appear(self.I_HFREEZE)
             self.slave_state = self.update_state()
             tracks = list(self.tracker(image=self.device.image, response=last_action))
-            tracks.extend(self.new_rare_recognizer(image=self.device.image))
+
+            # Act on built-in buffs immediately. The curated rare recognizer is
+            # comparatively expensive and must not delay a fast-moving buff.
+            first_target = Agent.select_target(tracks=tracks, state=self.slave_state)
             last_action = self.agent.decision(tracks=tracks, state=self.slave_state, freeze=freeze)
             self.do_action(last_action, state=self.slave_state)
+
+            new_rare_tracks = self.new_rare_recognizer(image=self.device.image)
+            tracks.extend(new_rare_tracks)
+            if new_rare_tracks:
+                merged_target = Agent.select_target(tracks=tracks, state=self.slave_state)
+                if first_target is None or merged_target[0] != first_target[0]:
+                    last_action = self.agent.decision(
+                        tracks=tracks, state=self.slave_state, freeze=freeze
+                    )
+                    self.do_action(last_action, state=self.slave_state)
 
             # debug
             if self._config.debug_config.hya_show:

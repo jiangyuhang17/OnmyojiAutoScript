@@ -14,7 +14,6 @@ from oashya.labels import id2label, id2name
 from module.logger import logger
 from tasks.Hyakkiyakou.agent.focus import Focus
 from tasks.Hyakkiyakou.debugger import Debugger
-from tasks.Hyakkiyakou.slave.hya_slave import HyaBuff
 
 
 def generate_gaussian_patch(size=(300, 300), mean=0, std_dev=60):
@@ -57,7 +56,13 @@ def embed_patch_in_canvas(canvas, patch, position=(0, 0), patch_size=(300, 300))
 class Agent:
     GAUSSIAN = generate_gaussian_patch()
     OBSERVE_THRESHOLD = 0.6
-    PROBABILITY_UP_EARLY_X = 720
+    CURATED_TRACK_ID_BASE = 900_000
+    PROBABILITY_UP_EARLY_X = 800
+    TARGET_LEAD_TIME_MS = 100
+    BUFF_LEAD_TIME_MS = 450
+    BUFF_MIN_LEFTWARD_SPEED = -0.30
+    BUFF_MAX_LEFTWARD_SPEED = -0.12
+    BUFF_AIM_ABOVE_BOX = 45
     NORMAL_BUFF_PRIORITIES = {
         CI.BUFF_006: 300,  # Probability UP
         CI.BUFF_003: 200,  # Faster throwing
@@ -154,10 +159,20 @@ class Agent:
             self.focus.update(target_focus)
 
         is_buff = self.focus._class in self.NORMAL_BUFF_PRIORITIES or self.focus._class == CI.BUFF_002
-        target_x = self.focus._cx + self.focus._v * 100
-        if not is_buff:
-            target_x -= self.focus._w // 2
-        target_y = self.focus._cy - 40
+        if is_buff:
+            # Buff detections mostly cover the hanging label. Track IDs can also
+            # switch classes and briefly report a positive or extreme velocity.
+            velocity = max(
+                self.BUFF_MIN_LEFTWARD_SPEED,
+                min(self.BUFF_MAX_LEFTWARD_SPEED, self.focus._v),
+            )
+            target_x = self.focus._cx + velocity * self.BUFF_LEAD_TIME_MS
+            target_y = self.focus._cy - self.focus._h / 2 - self.BUFF_AIM_ABOVE_BOX
+        else:
+            target_x = self.focus._cx + self.focus._v * self.TARGET_LEAD_TIME_MS
+            if self.focus._id < self.CURATED_TRACK_ID_BASE:
+                target_x -= self.focus._w // 2
+            target_y = self.focus._cy - 40
         target_x = int(max(0, min(1279, target_x)))
         target_y = int(max(0, min(719, target_y)))
 
@@ -173,17 +188,17 @@ class Agent:
     @classmethod
     def select_target(cls, tracks: list[tuple], state: list) -> tuple | None:
         rare_tracks = [track for track in tracks if cls.is_ssr_or_sp(track[1])]
-        has_prob_up = HyaBuff.BUFF_STATE6 in state[3:]
-
-        # Slow only when Probability UP is already active and a rare target is present.
-        if has_prob_up and rare_tracks:
-            slow_tracks = [track for track in tracks if track[1] == CI.BUFF_002]
-            if slow_tracks:
-                return cls._choose_track(slow_tracks)
-
         prob_up_tracks = [track for track in tracks if track[1] == CI.BUFF_006]
-        if rare_tracks and prob_up_tracks:
-            return cls._choose_track(prob_up_tracks)
+        slow_tracks = [track for track in tracks if track[1] == CI.BUFF_002]
+        faster_throw_tracks = [track for track in tracks if track[1] == CI.BUFF_003]
+
+        if rare_tracks:
+            # Protect rare targets regardless of which buffs are already active.
+            # Flying buffs are consumed in this exact order before throwing at SP/SSR.
+            for candidates in (prob_up_tracks, slow_tracks, faster_throw_tracks, rare_tracks):
+                if candidates:
+                    return cls._choose_track(candidates)
+
         left_prob_up_tracks = [
             track for track in prob_up_tracks
             if track[3] <= cls.PROBABILITY_UP_EARLY_X
@@ -191,12 +206,8 @@ class Agent:
         if left_prob_up_tracks:
             return cls._choose_track(left_prob_up_tracks)
 
-        faster_throw_tracks = [track for track in tracks if track[1] == CI.BUFF_003]
         if faster_throw_tracks:
             return cls._choose_track(faster_throw_tracks)
-
-        if rare_tracks:
-            return cls._choose_track(rare_tracks)
 
         extra_bean_tracks = [track for track in tracks if track[1] == CI.BUFF_004]
         if extra_bean_tracks:

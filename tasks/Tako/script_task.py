@@ -61,22 +61,30 @@ class ScriptTask(GameUi, GeneralBattle, GeneralRoom, GeneralInvite, SwitchSoul):
         # 进入到了房间里面
         wait_timer = Timer(60)
         wait_timer.start()
+        teammate_confirm_timer = Timer(1.5, count=2).start()
         while 1:
             self.screenshot()
 
-            if not self.is_in_room():
+            if not self.is_in_room(False):
+                teammate_confirm_timer.reset()
                 continue
             if wait_timer.reached():
                 logger.warning('Wait for too long, exit')
                 self.exit_room()
                 break
-            if not self.appear(self.I_ADD_1, threshold=0.85):
+            if self._teammate_ready(teammate_confirm_timer):
                 # 有人进来了，可以进行挑战
                 logger.info('There is someone in the room and start the challenge')
                 self.click_fire()
                 self.run_general_battle()
                 break
         self.exit_task()
+
+    def _teammate_ready(self, confirm_timer: Timer) -> bool:
+        if self.appear(self.I_ADD_1, threshold=0.85) or self.appear(self.I_FIRE_FAIL):
+            confirm_timer.reset()
+            return False
+        return confirm_timer.reached()
 
     def exit_task(self):
         """
@@ -136,5 +144,4 @@ if __name__ == '__main__':
     t.screenshot()
 
     t.run()
-
 

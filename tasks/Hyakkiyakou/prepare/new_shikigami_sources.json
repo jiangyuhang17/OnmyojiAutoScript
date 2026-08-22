@@ -1,6 +1,7 @@
 {
   "version": 1,
   "entries": [
+    {"slug": "ur_youtouhime", "name": "\u5996\u5200\u59ec\u00b7\u7eef\u591c\u730e\u5203", "rarity": "UR", "sources": [{"url": "https://www.bilibili.com/video/BV1yGWRzKEnq/", "kind": "showcase", "official": true}]},
     {"slug": "chenhui_ebisu", "name": "晨晖惠比寿", "rarity": "SP", "sources": [{"url": "https://www.taptap.cn/moment/520922052845110412", "kind": "showcase", "official": true}, {"url": "https://www.bilibili.com/video/BV1dm411r7ZN/", "kind": "showcase", "official": true}]},
     {"slug": "longyin_suzuka_gozen", "name": "龙吟铃鹿御前", "rarity": "SP", "sources": [{"url": "https://www.taptap.cn/moment/539741263159625124", "kind": "showcase", "official": true}, {"url": "https://www.bilibili.com/video/BV1WD421G7YH/", "kind": "showcase", "official": true}]},
     {"slug": "yaonian_enenra", "name": "遥念烟烟罗", "rarity": "SP", "sources": [{"url": "https://www.taptap.cn/moment/569953034587605286", "kind": "biography", "official": true}, {"url": "https://www.bilibili.com/video/BV1sb421J7y7/", "kind": "showcase", "official": true}]},

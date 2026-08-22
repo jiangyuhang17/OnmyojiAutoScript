@@ -16,6 +16,7 @@ SUPPORTED_NAMES = {
     "himiko",
     "ichikami",
     "kannazuki",
+    "karuta",
     "kuzuha",
     "longjue",
     "mengshan_shiro",
@@ -26,8 +27,10 @@ SUPPORTED_NAMES = {
     "shiyue_kyuketsuhime",
     "taira_no_masakado",
     "tianhuo_suzuhikohime",
+    "ur_youtouhime",
     "xinyou_inugami",
     "yaoyin_kinnara",
+    "yaonian_enenra",
     "yuki_gozen",
     "yunjian_fugengaku",
 }
@@ -55,7 +58,7 @@ class NewRareRecognizerTest(unittest.TestCase):
     def test_supported_names_are_complete(self):
         self.assertEqual(set(self.recognizer.names), SUPPORTED_NAMES)
 
-    def test_each_curated_shikigami_is_returned_as_sp(self):
+    def test_each_curated_shikigami_uses_rare_compatibility_class(self):
         for name in self.recognizer.names:
             with self.subTest(name=name):
                 tracks = self.recognizer(self.render_template(name))

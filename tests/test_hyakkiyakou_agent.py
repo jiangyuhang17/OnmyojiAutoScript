@@ -52,11 +52,35 @@ class HyakkiyakouAgentTest(unittest.TestCase):
         self.assertEqual(selected[1], CI.BUFF_006)
 
     def test_prob_up_waits_until_early_threshold_without_rare_target(self):
-        right_tracks = [track(1, CI.BUFF_006, 721)]
-        left_tracks = [track(1, CI.BUFF_006, 720)]
+        right_tracks = [track(1, CI.BUFF_006, 801)]
+        left_tracks = [track(1, CI.BUFF_006, 800)]
 
         self.assertIsNone(Agent.select_target(right_tracks, self.empty_state))
         self.assertEqual(Agent.select_target(left_tracks, self.empty_state)[1], CI.BUFF_006)
+
+    def test_buff_click_leads_moving_target_further(self):
+        agent = Agent()
+        tracks = [(1, CI.BUFF_006, 0.9, 700, 360, 100, 46, -0.2)]
+
+        action = agent.decision(tracks, self.empty_state)
+
+        self.assertEqual(action[:2], [610, 292])
+
+    def test_buff_click_forces_invalid_velocity_to_move_left(self):
+        agent = Agent()
+        tracks = [(1, CI.BUFF_006, 0.9, 700, 360, 100, 46, 0.1)]
+
+        action = agent.decision(tracks, self.empty_state)
+
+        self.assertEqual(action[:2], [646, 292])
+
+    def test_buff_click_clamps_extreme_leftward_velocity(self):
+        agent = Agent()
+        tracks = [(1, CI.BUFF_006, 0.9, 700, 360, 100, 46, -0.9)]
+
+        action = agent.decision(tracks, self.empty_state)
+
+        self.assertEqual(action[:2], [565, 292])
 
     def test_other_buffs_can_be_hit_while_prob_up_waits(self):
         tracks = [track(1, CI.BUFF_006, 900), track(2, CI.BUFF_003, 800)]
@@ -72,19 +96,30 @@ class HyakkiyakouAgentTest(unittest.TestCase):
 
         self.assertEqual(selected[1], CI.BUFF_003)
 
-    def test_slow_has_top_priority_with_prob_up_and_rare_target(self):
+    def test_probability_up_precedes_slow_with_rare_target(self):
         tracks = [track(1, CI.BUFF_006), track(2, CI.BUFF_002), track(3, self.ssr)]
 
         selected = Agent.select_target(tracks, self.prob_up_state)
 
-        self.assertEqual(selected[1], CI.BUFF_002)
+        self.assertEqual(selected[1], CI.BUFF_006)
 
-    def test_slow_is_ignored_without_active_prob_up(self):
+    def test_slow_precedes_rare_without_active_probability_buff(self):
         tracks = [track(1, CI.BUFF_002), track(2, self.ssr)]
 
         selected = Agent.select_target(tracks, self.empty_state)
 
-        self.assertEqual(selected[1], self.ssr)
+        self.assertEqual(selected[1], CI.BUFF_002)
+
+    def test_slow_precedes_faster_throw_and_rare_without_active_buff(self):
+        tracks = [
+            track(1, self.sp),
+            track(2, CI.BUFF_003),
+            track(3, CI.BUFF_002),
+        ]
+
+        selected = Agent.select_target(tracks, self.empty_state)
+
+        self.assertEqual(selected[1], CI.BUFF_002)
 
     def test_slow_is_ignored_without_rare_target(self):
         tracks = [track(1, CI.BUFF_002), track(2, CI.MIN_SR)]
@@ -115,6 +150,14 @@ class HyakkiyakouAgentTest(unittest.TestCase):
 
         self.assertEqual(action[:2], [0, 0])
         self.assertTrue(action[2])
+
+    def test_curated_rare_clicks_bbox_center_instead_of_left_edge(self):
+        agent = Agent()
+        tracks = [(900_000, self.sp, 0.9, 900, 410, 290, 260, -0.1)]
+
+        action = agent.decision(tracks, self.empty_state)
+
+        self.assertEqual(action[:2], [890, 370])
 
     def test_rare_target_uses_two_click_burst(self):
         focus = SimpleNamespace(_class=self.ssr, _cx=900)

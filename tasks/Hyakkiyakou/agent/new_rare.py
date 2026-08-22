@@ -25,7 +25,7 @@ class RareTemplate:
 
 
 class NewRareRecognizer:
-    """Detect curated new SP/SSR sprites and return oashya-compatible tracks."""
+    """Detect curated new rare sprites and return oashya-compatible tracks."""
 
     TRACK_ID_BASE = 900_000
     SEARCH_TOP = 140

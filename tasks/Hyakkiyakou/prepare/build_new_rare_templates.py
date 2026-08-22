@@ -70,6 +70,14 @@ SOURCES = {
         "directory": ROOT / "log" / "hya" / "20260821T05",
         "background": None,
     },
+    "local_20260821T16": {
+        "directory": ROOT / "log" / "hya" / "20260821T16",
+        "background": None,
+    },
+    "local_20260822T03": {
+        "directory": ROOT / "log" / "hya" / "20260822T03",
+        "background": None,
+    },
     "public_20260814": {
         "directory": PUBLIC_ROOT / "targets" / "ssr" / "taira_no_masakado",
         "background": PUBLIC_ROOT / "events" / "event_0277_07751.744.jpg",
@@ -117,10 +125,37 @@ SOURCES = {
         "directory": PUBLIC_V4_ROOT / "shiyue_pre",
         "background": None,
     },
+    "public_yaonian": {
+        "directory": PUBLIC_ROOT / "targets" / "sp" / "yaonian_enenra",
+        "background": None,
+    },
 }
 
 # Coordinates are target-only regions in normalized 1280x720 captures.
 ANNOTATIONS = {
+    "ur_youtouhime": [
+        Annotation(
+            "local_20260822T03",
+            "hya_1787342299724.jpg",
+            (1020, 330, 1280, 610),
+            ((1050, 360, 1280, 590),),
+        ),
+        Annotation(
+            "local_20260822T03",
+            "hya_1787342302129.jpg",
+            (590, 330, 825, 610),
+            ((610, 350, 815, 590),),
+        ),
+        Annotation(
+            "local_20260822T03",
+            "hya_1787342303374.jpg",
+            (285, 330, 525, 610),
+            (
+                (300, 350, 410, 590),
+                (390, 350, 515, 425),
+            ),
+        ),
+    ],
     "fuso_kozen": [
         Annotation("local_20260821T05", "hya_1787260314501.jpg", (1090, 280, 1280, 610)),
         Annotation("local_20260821T05", "hya_1787260316128.jpg", (900, 275, 1190, 610)),
@@ -143,9 +178,36 @@ ANNOTATIONS = {
         Annotation("local_20260821T04", "hya_1787257280751.jpg", (250, 270, 540, 600)),
     ],
     "yuki_gozen": [
-        Annotation("local_20260821T04", "hya_1787256704904.jpg", (960, 260, 1280, 610)),
-        Annotation("local_20260821T04", "hya_1787256707061.jpg", (590, 260, 940, 610)),
-        Annotation("local_20260821T04", "hya_1787256709370.jpg", (220, 260, 560, 610)),
+        Annotation(
+            "local_20260821T16",
+            "hya_1787301340787.jpg",
+            (950, 280, 1240, 540),
+            ((975, 300, 1230, 475),),
+        ),
+        Annotation(
+            "local_20260821T16",
+            "hya_1787301341992.jpg",
+            (780, 280, 1070, 540),
+            ((805, 300, 1055, 475),),
+        ),
+        Annotation(
+            "local_20260821T16",
+            "hya_1787301343153.jpg",
+            (580, 280, 860, 540),
+            ((610, 300, 840, 475),),
+        ),
+        Annotation(
+            "local_20260821T16",
+            "hya_1787301344393.jpg",
+            (370, 280, 650, 540),
+            ((400, 300, 630, 475),),
+        ),
+        Annotation(
+            "local_20260821T16",
+            "hya_1787301345567.jpg",
+            (120, 280, 430, 540),
+            ((145, 300, 410, 475),),
+        ),
     ],
     "shikinshin": [
         Annotation(
@@ -223,6 +285,56 @@ ANNOTATIONS = {
             "hya_1787080153090.jpg",
             (500, 325, 735, 610),
             ((510, 335, 710, 600),),
+        ),
+        Annotation(
+            "local_20260821T16",
+            "hya_1787301878643.jpg",
+            (820, 320, 1110, 590),
+            ((850, 335, 1080, 535),),
+        ),
+        Annotation(
+            "local_20260821T16",
+            "hya_1787301880439.jpg",
+            (530, 320, 800, 590),
+            ((555, 340, 780, 520),),
+        ),
+        Annotation(
+            "local_20260821T16",
+            "hya_1787301881310.jpg",
+            (370, 320, 650, 590),
+            ((400, 340, 620, 535),),
+        ),
+    ],
+    "karuta": [
+        Annotation(
+            "local_20260821T16",
+            "hya_1787301979223.jpg",
+            (800, 315, 970, 570),
+            ((825, 335, 945, 550),),
+        ),
+        Annotation(
+            "local_20260821T16",
+            "hya_1787301980341.jpg",
+            (620, 310, 790, 570),
+            ((645, 330, 765, 550),),
+        ),
+        Annotation(
+            "local_20260821T16",
+            "hya_1787301981453.jpg",
+            (430, 315, 600, 570),
+            ((455, 335, 575, 550),),
+        ),
+        Annotation(
+            "local_20260821T16",
+            "hya_1787301982680.jpg",
+            (250, 315, 420, 570),
+            ((275, 335, 395, 550),),
+        ),
+        Annotation(
+            "local_20260821T16",
+            "hya_1787301983791.jpg",
+            (55, 330, 225, 575),
+            ((80, 350, 205, 555),),
         ),
     ],
     "arakuro": [
@@ -349,6 +461,30 @@ ANNOTATIONS = {
         Annotation("local_20260816T17", "hya_1786871248295.jpg", (930, 330, 1280, 590)),
         Annotation("local_20260816T17", "hya_1786871248958.jpg", (825, 330, 1195, 590)),
         Annotation("local_20260816T17", "hya_1786871249620.jpg", (700, 330, 1085, 590)),
+        Annotation(
+            "local_20260822T03",
+            "hya_1787339489340.jpg",
+            (800, 320, 1190, 600),
+            ((800, 320, 1148, 600),),
+        ),
+        Annotation(
+            "local_20260822T03",
+            "hya_1787339490349.jpg",
+            (625, 320, 1015, 600),
+            ((625, 320, 960, 600),),
+        ),
+        Annotation(
+            "local_20260822T03",
+            "hya_1787339491213.jpg",
+            (445, 320, 825, 600),
+            ((475, 320, 780, 600),),
+        ),
+        Annotation(
+            "local_20260822T03",
+            "hya_1787339492146.jpg",
+            (285, 320, 675, 600),
+            ((285, 320, 625, 600),),
+        ),
     ],
     "xinyou_inugami": [
         Annotation("local_20260816T17", "hya_1786871176114.jpg", (425, 365, 615, 575)),
@@ -475,6 +611,26 @@ ANNOTATIONS = {
             "frame_03476.500.jpg",
             (205, 285, 525, 590),
             ((220, 300, 410, 570),),
+        ),
+    ],
+    "yaonian_enenra": [
+        Annotation(
+            "public_yaonian",
+            "event_0198_00_05402.370.jpg",
+            (940, 295, 1280, 590),
+            ((965, 315, 1275, 570),),
+        ),
+        Annotation(
+            "public_yaonian",
+            "event_0198_02_05403.324.jpg",
+            (735, 295, 1080, 590),
+            ((760, 315, 1060, 570),),
+        ),
+        Annotation(
+            "public_yaonian",
+            "event_0245_00_06857.789.jpg",
+            (570, 295, 930, 590),
+            ((595, 315, 910, 490),),
         ),
     ],
 }

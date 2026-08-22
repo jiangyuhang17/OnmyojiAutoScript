@@ -351,7 +351,11 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
         while 1:
             self.screenshot()
 
-            if self.appear(self.I_U_ENTER_REALM):
+            if (
+                self.appear(self.I_U_ENTER_REALM)
+                or self.appear(self.I_UTILIZE_FRIEND_GROUP)
+                or self.appear(self.I_UTILIZE_ZONES_GROUP)
+            ):
                 break
             if self.appear_then_click(self.I_UTILIZE_ADD, interval=2):
                 continue

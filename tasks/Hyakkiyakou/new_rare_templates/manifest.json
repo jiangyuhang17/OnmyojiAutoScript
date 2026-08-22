@@ -3,6 +3,27 @@
   "threshold": 0.85,
   "templates": [
     {
+      "name": "ur_youtouhime",
+      "file": "ur_youtouhime_0.png",
+      "source": "local_20260822T03:hya_1787342299724.jpg",
+      "width": 260,
+      "height": 280
+    },
+    {
+      "name": "ur_youtouhime",
+      "file": "ur_youtouhime_1.png",
+      "source": "local_20260822T03:hya_1787342302129.jpg",
+      "width": 235,
+      "height": 280
+    },
+    {
+      "name": "ur_youtouhime",
+      "file": "ur_youtouhime_2.png",
+      "source": "local_20260822T03:hya_1787342303374.jpg",
+      "width": 240,
+      "height": 280
+    },
+    {
       "name": "fuso_kozen",
       "file": "fuso_kozen_0.png",
       "source": "local_20260821T05:hya_1787260314501.jpg",
@@ -96,23 +117,37 @@
     {
       "name": "yuki_gozen",
       "file": "yuki_gozen_0.png",
-      "source": "local_20260821T04:hya_1787256704904.jpg",
-      "width": 320,
-      "height": 350
+      "source": "local_20260821T16:hya_1787301340787.jpg",
+      "width": 290,
+      "height": 260
     },
     {
       "name": "yuki_gozen",
       "file": "yuki_gozen_1.png",
-      "source": "local_20260821T04:hya_1787256707061.jpg",
-      "width": 350,
-      "height": 350
+      "source": "local_20260821T16:hya_1787301341992.jpg",
+      "width": 290,
+      "height": 260
     },
     {
       "name": "yuki_gozen",
       "file": "yuki_gozen_2.png",
-      "source": "local_20260821T04:hya_1787256709370.jpg",
-      "width": 340,
-      "height": 350
+      "source": "local_20260821T16:hya_1787301343153.jpg",
+      "width": 280,
+      "height": 260
+    },
+    {
+      "name": "yuki_gozen",
+      "file": "yuki_gozen_3.png",
+      "source": "local_20260821T16:hya_1787301344393.jpg",
+      "width": 280,
+      "height": 260
+    },
+    {
+      "name": "yuki_gozen",
+      "file": "yuki_gozen_4.png",
+      "source": "local_20260821T16:hya_1787301345567.jpg",
+      "width": 310,
+      "height": 260
     },
     {
       "name": "shikinshin",
@@ -197,6 +232,62 @@
       "source": "local_20260819T03:hya_1787080153090.jpg",
       "width": 235,
       "height": 285
+    },
+    {
+      "name": "ichikami",
+      "file": "ichikami_5.png",
+      "source": "local_20260821T16:hya_1787301878643.jpg",
+      "width": 290,
+      "height": 270
+    },
+    {
+      "name": "ichikami",
+      "file": "ichikami_6.png",
+      "source": "local_20260821T16:hya_1787301880439.jpg",
+      "width": 270,
+      "height": 270
+    },
+    {
+      "name": "ichikami",
+      "file": "ichikami_7.png",
+      "source": "local_20260821T16:hya_1787301881310.jpg",
+      "width": 280,
+      "height": 270
+    },
+    {
+      "name": "karuta",
+      "file": "karuta_0.png",
+      "source": "local_20260821T16:hya_1787301979223.jpg",
+      "width": 170,
+      "height": 255
+    },
+    {
+      "name": "karuta",
+      "file": "karuta_1.png",
+      "source": "local_20260821T16:hya_1787301980341.jpg",
+      "width": 170,
+      "height": 260
+    },
+    {
+      "name": "karuta",
+      "file": "karuta_2.png",
+      "source": "local_20260821T16:hya_1787301981453.jpg",
+      "width": 170,
+      "height": 255
+    },
+    {
+      "name": "karuta",
+      "file": "karuta_3.png",
+      "source": "local_20260821T16:hya_1787301982680.jpg",
+      "width": 170,
+      "height": 255
+    },
+    {
+      "name": "karuta",
+      "file": "karuta_4.png",
+      "source": "local_20260821T16:hya_1787301983791.jpg",
+      "width": 170,
+      "height": 245
     },
     {
       "name": "arakuro",
@@ -472,6 +563,34 @@
       "height": 260
     },
     {
+      "name": "fengyangjun",
+      "file": "fengyangjun_3.png",
+      "source": "local_20260822T03:hya_1787339489340.jpg",
+      "width": 390,
+      "height": 280
+    },
+    {
+      "name": "fengyangjun",
+      "file": "fengyangjun_4.png",
+      "source": "local_20260822T03:hya_1787339490349.jpg",
+      "width": 390,
+      "height": 280
+    },
+    {
+      "name": "fengyangjun",
+      "file": "fengyangjun_5.png",
+      "source": "local_20260822T03:hya_1787339491213.jpg",
+      "width": 380,
+      "height": 280
+    },
+    {
+      "name": "fengyangjun",
+      "file": "fengyangjun_6.png",
+      "source": "local_20260822T03:hya_1787339492146.jpg",
+      "width": 390,
+      "height": 280
+    },
+    {
       "name": "xinyou_inugami",
       "file": "xinyou_inugami_0.png",
       "source": "local_20260816T17:hya_1786871176114.jpg",
@@ -624,6 +743,27 @@
       "source": "public_shiyue:frame_03476.500.jpg",
       "width": 320,
       "height": 305
+    },
+    {
+      "name": "yaonian_enenra",
+      "file": "yaonian_enenra_0.png",
+      "source": "public_yaonian:event_0198_00_05402.370.jpg",
+      "width": 340,
+      "height": 295
+    },
+    {
+      "name": "yaonian_enenra",
+      "file": "yaonian_enenra_1.png",
+      "source": "public_yaonian:event_0198_02_05403.324.jpg",
+      "width": 345,
+      "height": 295
+    },
+    {
+      "name": "yaonian_enenra",
+      "file": "yaonian_enenra_2.png",
+      "source": "public_yaonian:event_0245_00_06857.789.jpg",
+      "width": 360,
+      "height": 295
     }
   ]
 }
