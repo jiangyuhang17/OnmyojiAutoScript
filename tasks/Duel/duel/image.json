@@ -81,6 +81,15 @@
     "description": "Duel result share button"
   },
   {
+    "itemName": "d_result_share_dark",
+    "imageName": "duel_d_result_share_dark.png",
+    "roiFront": "1122,584,132,126",
+    "roiBack": "1090,550,188,170",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "Duel result share button on dark background"
+  },
+  {
     "itemName": "d_fail",
     "imageName": "duel_d_fail.png",
     "roiFront": "422,66,100,100",

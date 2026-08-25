@@ -333,7 +333,7 @@ class ScriptTask(GameUi, GeneralBattle, SwitchSoul, DuelAssets, SwitchOnmyoji):
 
     def is_battle_win(self) -> bool:
         return self.appear(self.I_WIN) or self.appear(self.I_D_VICTORY) or \
-            self.appear(self.I_D_RESULT_SHARE)
+            self.appear(self.I_D_RESULT_SHARE) or self.appear(self.I_D_RESULT_SHARE_DARK)
 
     def is_battle_lose(self) -> bool:
         return self.appear(self.I_FALSE) or self.appear(self.I_D_FAIL)

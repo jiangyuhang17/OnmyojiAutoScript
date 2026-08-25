@@ -36,6 +36,8 @@ class DuelAssets:
 	I_D_VICTORY = RuleImage(roi_front=(433,76,100,100), roi_back=(433,76,100,100), threshold=0.8, method="Template matching", file="./tasks/Duel/duel/duel_d_victory.png")
 	# Duel result share button
 	I_D_RESULT_SHARE = RuleImage(roi_front=(1122,584,132,126), roi_back=(1090,550,188,170), threshold=0.8, method="Template matching", file="./tasks/Duel/duel/duel_d_result_share.png")
+	# Duel result share button on dark background
+	I_D_RESULT_SHARE_DARK = RuleImage(roi_front=(1122,584,132,126), roi_back=(1090,550,188,170), threshold=0.8, method="Template matching", file="./tasks/Duel/duel/duel_d_result_share_dark.png")
 	# 失败 
 	I_D_FAIL = RuleImage(roi_front=(422,66,100,100), roi_back=(422,66,100,100), threshold=0.8, method="Template matching", file="./tasks/Duel/duel/duel_d_fail.png")
 	# 战 

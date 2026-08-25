@@ -20,6 +20,14 @@ class DuelEntryNoticeTest(unittest.TestCase):
 
         self.assertFalse(task.dismiss_duel_entry_notice())
 
+    def test_dark_result_share_counts_as_battle_win(self):
+        task = ScriptTask.__new__(ScriptTask)
+        task.appear = Mock(
+            side_effect=lambda image: image is task.I_D_RESULT_SHARE_DARK
+        )
+
+        self.assertTrue(task.is_battle_win())
+
 
 if __name__ == '__main__':
     unittest.main()
