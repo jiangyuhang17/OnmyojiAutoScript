@@ -49,8 +49,13 @@ def plot_save(image, boxes):
 
 class ScriptTask(GameUi, HyaSlave, SwitchOnmyoji):
 
-    RARE_BURST_COUNT = 2
-    RARE_BURST_MIN_X = 480
+    RARE_BURST_COUNT = 3
+    RARE_BURST_MIN_X = 360
+    RARE_BURST_INTERVAL = 0.16
+    RARE_MAX_CLICKS = 12
+    RARE_TRACK_ABSENCE_RESET = 2.0
+    NEW_RARE_SCAN_INTERVAL = 1.2
+    NEW_RARE_CACHE_TTL = 1.8
 
     @property
     def _config(self):
@@ -249,6 +254,7 @@ class ScriptTask(GameUi, HyaSlave, SwitchOnmyoji):
 
     def one(self):
         self.reset_state()
+        self._reset_hyakki_runtime_state()
         if not self.appear(self.I_HACCESS):
             logger.warning('Page Error')
         if self._config.hyakkiyakou_config.hya_invite_friend:
@@ -289,22 +295,40 @@ class ScriptTask(GameUi, HyaSlave, SwitchOnmyoji):
             freeze = self.appear(self.I_HFREEZE)
             self.slave_state = self.update_state()
             tracks = list(self.tracker(image=self.device.image, response=last_action))
+            self.agent.track_names = self.new_rare_recognizer.track_names
 
-            # Act on built-in buffs immediately. The curated rare recognizer is
-            # comparatively expensive and must not delay a fast-moving buff.
-            first_target = Agent.select_target(tracks=tracks, state=self.slave_state)
-            last_action = self.agent.decision(tracks=tracks, state=self.slave_state, freeze=freeze)
-            self.do_action(last_action, state=self.slave_state)
-
-            new_rare_tracks = self.new_rare_recognizer(image=self.device.image)
-            tracks.extend(new_rare_tracks)
-            if new_rare_tracks:
-                merged_target = Agent.select_target(tracks=tracks, state=self.slave_state)
-                if first_target is None or merged_target[0] != first_target[0]:
+            # The curated matcher is substantially slower than the bundled tracker.
+            # Scan it periodically, then project cached tracks between scans so rare
+            # targeting can continue at the configured screenshot cadence.
+            if self._new_rare_scan_due():
+                first_target = Agent.select_target(tracks=tracks, state=self.slave_state)
+                if first_target is not None:
                     last_action = self.agent.decision(
-                        tracks=tracks, state=self.slave_state, freeze=freeze
+                        tracks=tracks,
+                        state=self.slave_state,
+                        freeze=freeze,
                     )
+                    self._update_rare_presence(tracks)
                     self.do_action(last_action, state=self.slave_state)
+                new_rare_tracks = self._scan_new_rare(self.device.image)
+                tracks.extend(new_rare_tracks)
+                if first_target is None:
+                    last_action = self.agent.decision(
+                        tracks=tracks,
+                        state=self.slave_state,
+                        freeze=freeze,
+                    )
+                    self._update_rare_presence(tracks)
+                    self.do_action(last_action, state=self.slave_state)
+            else:
+                tracks.extend(self._project_cached_new_rare_tracks())
+                last_action = self.agent.decision(
+                    tracks=tracks,
+                    state=self.slave_state,
+                    freeze=freeze,
+                )
+                self._update_rare_presence(tracks)
+                self.do_action(last_action, state=self.slave_state)
 
             # debug
             if self._config.debug_config.hya_show:
@@ -328,28 +352,104 @@ class ScriptTask(GameUi, HyaSlave, SwitchOnmyoji):
         # you maybe update oashya
         self.tracker.clear_tracks()
 
+    def _reset_hyakki_runtime_state(self):
+        self._new_rare_last_scan = 0.0
+        self._new_rare_cache_time = 0.0
+        self._new_rare_cache = []
+        self._rare_click_counts = {}
+        self._rare_last_seen = {}
+        self._rare_budget_logged = set()
+
+    def _new_rare_scan_due(self, now: float | None = None) -> bool:
+        now = time.monotonic() if now is None else now
+        return now - self._new_rare_last_scan >= self.NEW_RARE_SCAN_INTERVAL
+
+    def _scan_new_rare(self, image) -> list[tuple]:
+        tracks = self.new_rare_recognizer(image=image)
+        now = time.monotonic()
+        self._new_rare_last_scan = now
+        self._new_rare_cache_time = now
+        self._new_rare_cache = tracks
+        return tracks
+
+    def _project_cached_new_rare_tracks(self, now: float | None = None) -> list[tuple]:
+        now = time.monotonic() if now is None else now
+        age = now - self._new_rare_cache_time
+        if age < 0 or age > self.NEW_RARE_CACHE_TTL:
+            return []
+
+        age_ms = age * 1000
+        projected = []
+        for track in self._new_rare_cache:
+            track_id, class_id, conf, cx, cy, width, height, velocity = track
+            cx += velocity * age_ms
+            if cx + width / 2 < 0 or cx - width / 2 > 1279:
+                continue
+            projected.append(
+                (track_id, class_id, conf, cx, cy, width, height, velocity)
+            )
+        return projected
+
+    def _update_rare_presence(self, tracks: list[tuple], now: float | None = None):
+        now = time.monotonic() if now is None else now
+        for track in tracks:
+            if Agent.is_ssr_or_sp(track[1]):
+                self._rare_last_seen[track[0]] = now
+
+        expired = [
+            track_id
+            for track_id, last_seen in self._rare_last_seen.items()
+            if now - last_seen > self.RARE_TRACK_ABSENCE_RESET
+        ]
+        for track_id in expired:
+            self._rare_last_seen.pop(track_id, None)
+            self._rare_click_counts.pop(track_id, None)
+            self._rare_budget_logged.discard(track_id)
+
     def do_action(self, action: list, state):
         x, y, throw, bean = action
         if not throw:
             return
         if state[0] <= 0:
             return
-        click_count = self._action_click_count(self.agent.focus, state)
+        focus = self.agent.focus
+        rare_click_counts = getattr(self, '_rare_click_counts', {})
+        rare_budget_logged = getattr(self, '_rare_budget_logged', set())
+        already_clicked = rare_click_counts.get(focus._id, 0) if focus else 0
+        click_count = self._action_click_count(focus, state, already_clicked)
+        if click_count <= 0:
+            if focus._id not in rare_budget_logged:
+                target_name = self.agent.track_names.get(focus._id, id2name(focus._class))
+                logger.info(
+                    f'Rare throw budget reached: {target_name}, '
+                    f'clicks={already_clicked}'
+                )
+                rare_budget_logged.add(focus._id)
+                self._rare_budget_logged = rare_budget_logged
+            return
         action[3] = bean * click_count
-        for _ in range(click_count):
+        for index in range(click_count):
             self.fast_click(x=x, y=y, control_method=self._config.debug_config.hya_control_method)
+            if index + 1 < click_count:
+                time.sleep(ScriptTask.RARE_BURST_INTERVAL)
+        if Agent.is_ssr_or_sp(focus._class):
+            rare_click_counts[focus._id] = already_clicked + click_count
+            self._rare_click_counts = rare_click_counts
 
     @classmethod
-    def _action_click_count(cls, focus, state: list) -> int:
+    def _action_click_count(cls, focus, state: list, already_clicked: int = 0) -> int:
         if focus is None or not Agent.is_ssr_or_sp(focus._class):
             return 1
+        remaining = cls.RARE_MAX_CLICKS - already_clicked
+        if remaining <= 0:
+            return 0
         if focus._cx < cls.RARE_BURST_MIN_X:
-            return 1
+            return min(1, remaining)
 
         bean_per_click = state[2] if len(state) > 2 else 10
         if state[0] < bean_per_click * cls.RARE_BURST_COUNT:
-            return 1
-        return cls.RARE_BURST_COUNT
+            return min(1, remaining)
+        return min(cls.RARE_BURST_COUNT, remaining)
 
 
 if __name__ == '__main__':

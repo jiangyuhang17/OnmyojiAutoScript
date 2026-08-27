@@ -90,6 +90,7 @@ class Agent:
         self.last_throw_time = datetime.now()
         self.dbg_throw: int = 0
         self.dbg_throw_n: int = 0
+        self.track_names: dict[int, str] = {}
 
     @classmethod
     def gamma(cls, tracks: list[tuple],
@@ -145,7 +146,14 @@ class Agent:
             self._clear_focus()
             return not_decision
 
-        target = self.select_target(tracks=tracks, state=state)
+        preferred_rare_id = None
+        if self.focus is not None and self.is_ssr_or_sp(self.focus._class):
+            preferred_rare_id = self.focus._id
+        target = self.select_target(
+            tracks=tracks,
+            state=state,
+            preferred_rare_id=preferred_rare_id,
+        )
         if target is None:
             self._clear_focus()
             self.dbg_throw_n += 1
@@ -153,7 +161,11 @@ class Agent:
 
         target_focus = Focus(inputs=target)
         if self.focus is None or self.focus._id != target_focus._id:
-            logger.info(f'Focus changed, now: {id2name(target_focus._class)}')
+            target_name = self.track_names.get(
+                target_focus._id,
+                id2name(target_focus._class),
+            )
+            logger.info(f'Focus changed, now: {target_name}')
             self.focus = target_focus
         else:
             self.focus.update(target_focus)
@@ -186,7 +198,12 @@ class Agent:
                 CI.MIN_SP <= class_id <= CI.MAX_SP)
 
     @classmethod
-    def select_target(cls, tracks: list[tuple], state: list) -> tuple | None:
+    def select_target(
+            cls,
+            tracks: list[tuple],
+            state: list,
+            preferred_rare_id: int | None = None,
+    ) -> tuple | None:
         rare_tracks = [track for track in tracks if cls.is_ssr_or_sp(track[1])]
         prob_up_tracks = [track for track in tracks if track[1] == CI.BUFF_006]
         slow_tracks = [track for track in tracks if track[1] == CI.BUFF_002]
@@ -195,9 +212,13 @@ class Agent:
         if rare_tracks:
             # Protect rare targets regardless of which buffs are already active.
             # Flying buffs are consumed in this exact order before throwing at SP/SSR.
-            for candidates in (prob_up_tracks, slow_tracks, faster_throw_tracks, rare_tracks):
+            for candidates in (prob_up_tracks, slow_tracks, faster_throw_tracks):
                 if candidates:
                     return cls._choose_track(candidates)
+            for track in rare_tracks:
+                if track[0] == preferred_rare_id:
+                    return track
+            return cls._choose_track(rare_tracks)
 
         left_prob_up_tracks = [
             track for track in prob_up_tracks

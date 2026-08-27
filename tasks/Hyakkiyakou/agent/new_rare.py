@@ -34,6 +34,8 @@ class NewRareRecognizer:
 
     def __init__(self, asset_dir: Path | None = None):
         self.asset_dir = asset_dir or Path(__file__).resolve().parents[1] / "new_rare_templates"
+        self.names: list[str] = []
+        self.track_names: dict[int, str] = {}
         manifest_path = self.asset_dir / "manifest.json"
         if not manifest_path.exists():
             self.threshold = 1.1
@@ -45,6 +47,10 @@ class NewRareRecognizer:
         self.threshold = float(manifest["threshold"])
         self.templates = [self._load_template(item) for item in manifest["templates"]]
         self.names = sorted({template.name for template in self.templates})
+        self.track_names = {
+            self.TRACK_ID_BASE + index: name
+            for index, name in enumerate(self.names)
+        }
         self._visible_names: set[str] = set()
 
     def _load_template(self, item: dict) -> RareTemplate:

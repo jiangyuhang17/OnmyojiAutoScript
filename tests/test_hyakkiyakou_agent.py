@@ -142,6 +142,28 @@ class HyakkiyakouAgentTest(unittest.TestCase):
 
         self.assertEqual(selected[0], 2)
 
+    def test_keeps_preferred_rare_target_while_it_is_visible(self):
+        tracks = [track(1, self.ssr, 500), track(2, self.sp, 1000)]
+
+        selected = Agent.select_target(
+            tracks,
+            self.prob_up_state,
+            preferred_rare_id=1,
+        )
+
+        self.assertEqual(selected[0], 1)
+
+    def test_buff_still_precedes_preferred_rare_target(self):
+        tracks = [track(1, self.ssr, 500), track(2, CI.BUFF_003, 1000)]
+
+        selected = Agent.select_target(
+            tracks,
+            self.prob_up_state,
+            preferred_rare_id=1,
+        )
+
+        self.assertEqual(selected[1], CI.BUFF_003)
+
     def test_click_coordinates_stay_inside_screen(self):
         agent = Agent()
         tracks = [(1, self.ssr, 0.9, 5, 20, 100, 160, -1.0)]
@@ -159,10 +181,10 @@ class HyakkiyakouAgentTest(unittest.TestCase):
 
         self.assertEqual(action[:2], [890, 370])
 
-    def test_rare_target_uses_two_click_burst(self):
+    def test_rare_target_uses_three_click_burst(self):
         focus = SimpleNamespace(_class=self.ssr, _cx=900)
 
-        self.assertEqual(ScriptTask._action_click_count(focus, self.empty_state), 2)
+        self.assertEqual(ScriptTask._action_click_count(focus, self.empty_state), 3)
 
     def test_buff_target_uses_single_click(self):
         focus = SimpleNamespace(_class=CI.BUFF_006, _cx=900)
@@ -170,7 +192,7 @@ class HyakkiyakouAgentTest(unittest.TestCase):
         self.assertEqual(ScriptTask._action_click_count(focus, self.empty_state), 1)
 
     def test_rare_target_on_left_uses_single_click(self):
-        focus = SimpleNamespace(_class=self.sp, _cx=479)
+        focus = SimpleNamespace(_class=self.sp, _cx=359)
 
         self.assertEqual(ScriptTask._action_click_count(focus, self.empty_state), 1)
 
@@ -180,11 +202,26 @@ class HyakkiyakouAgentTest(unittest.TestCase):
 
         self.assertEqual(ScriptTask._action_click_count(focus, low_bean_state), 1)
 
-    def test_rare_burst_clicks_twice_and_reports_total_beans(self):
+    def test_rare_target_clicks_are_capped_per_appearance(self):
+        focus = SimpleNamespace(_class=self.sp, _cx=900)
+
+        self.assertEqual(
+            ScriptTask._action_click_count(focus, self.empty_state, already_clicked=11),
+            1,
+        )
+        self.assertEqual(
+            ScriptTask._action_click_count(focus, self.empty_state, already_clicked=12),
+            0,
+        )
+
+    def test_rare_burst_clicks_three_times_and_reports_total_beans(self):
         action = [900, 360, True, 10]
         fast_click = Mock()
         task = SimpleNamespace(
-            agent=SimpleNamespace(focus=SimpleNamespace(_class=self.sp, _cx=900)),
+            agent=SimpleNamespace(
+                focus=SimpleNamespace(_id=1, _class=self.sp, _cx=900),
+                track_names={},
+            ),
             _config=SimpleNamespace(
                 debug_config=SimpleNamespace(hya_control_method='minitouch')
             ),
@@ -194,8 +231,32 @@ class HyakkiyakouAgentTest(unittest.TestCase):
 
         ScriptTask.do_action(task, action, self.empty_state)
 
-        self.assertEqual(fast_click.call_count, 2)
-        self.assertEqual(action[3], 20)
+        self.assertEqual(fast_click.call_count, 3)
+        self.assertEqual(action[3], 30)
+        self.assertEqual(task._rare_click_counts, {1: 3})
+
+    def test_cached_new_rare_track_projects_with_velocity(self):
+        task = SimpleNamespace(
+            _new_rare_cache_time=10.0,
+            _new_rare_cache=[(900_000, self.sp, 0.9, 900, 400, 200, 240, -0.1)],
+            NEW_RARE_CACHE_TTL=1.8,
+        )
+
+        projected = ScriptTask._project_cached_new_rare_tracks(task, now=10.5)
+
+        self.assertEqual(projected[0][3], 850)
+
+    def test_cached_new_rare_track_expires(self):
+        task = SimpleNamespace(
+            _new_rare_cache_time=10.0,
+            _new_rare_cache=[(900_000, self.sp, 0.9, 900, 400, 200, 240, -0.1)],
+            NEW_RARE_CACHE_TTL=1.8,
+        )
+
+        self.assertEqual(
+            ScriptTask._project_cached_new_rare_tracks(task, now=11.9),
+            [],
+        )
 
 
 if __name__ == '__main__':

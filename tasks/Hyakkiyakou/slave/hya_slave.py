@@ -6,6 +6,7 @@ from enum import Enum
 
 from module.logger import logger
 from module.base.timer import Timer
+from module.atom.click import RuleClick
 from module.atom.image import RuleImage
 from module.exception import RequestHumanTakeover
 from tasks.Hyakkiyakou.slave.hya_device import HyaDevice
@@ -41,6 +42,13 @@ class HyaSlave(HyaDevice, HyaColor, HyakkiyakouAssets):
     DECADE0DECADE: list[int] = [126, 647, 18, 25]
     UNIT0DECADE: list[int] = [140, 647, 18, 25]
     UNIT0: list[int] = [132, 647, 18, 25]
+    FRIEND_TAB_SWITCH_TIMEOUT = 5
+    INVITATION_CLOSE_TIMEOUT = 5
+    C_INVITATION_CLOSE = RuleClick(
+        roi_front=(928, 118, 40, 40),
+        roi_back=(928, 118, 40, 40),
+        name='invitation_close',
+    )
     # buff
     BUFF_ROI1: list[int] = [150, 1, 150, 50]
     BUFF_ROI2: list[int] = [320, 1, 140, 50]
@@ -254,9 +262,14 @@ class HyaSlave(HyaDevice, HyaColor, HyakkiyakouAssets):
                 case _:
                     raise RequestHumanTakeover('Invite friend failed')
 
+        logger.warning('No friend available, continue Hyakkiyakou without invitation')
+        self._close_invitation()
+        return False
+
     def _invite_friend(self, button1: RuleImage, button2: RuleImage, hya_recall_activity: bool = False ) -> bool:
         logger.info('Start clicking')
-        self.ui_click(button1, button2)
+        if not self._switch_friend_tab(button1, button2):
+            return False
         logger.info('End clicking')
         invite_timer = Timer(8)
         invite_timer.start()
@@ -280,6 +293,29 @@ class HyaSlave(HyaDevice, HyaColor, HyakkiyakouAssets):
                 return False
         logger.info('Invite friend done')
         return True
+
+    def _switch_friend_tab(self, button: RuleImage, selected: RuleImage) -> bool:
+        timer = Timer(self.FRIEND_TAB_SWITCH_TIMEOUT).start()
+        while 1:
+            self.screenshot()
+            if self.appear(selected):
+                return True
+            if timer.reached():
+                logger.warning(f'Friend tab switch timeout: {button}')
+                return False
+            # Tab artwork changes frequently, but its configured ROI remains usable.
+            self.click(button, interval=1)
+
+    def _close_invitation(self) -> bool:
+        timer = Timer(self.INVITATION_CLOSE_TIMEOUT).start()
+        while 1:
+            self.screenshot()
+            if not self.appear(self.I_CHECK_INVITATION):
+                return True
+            if timer.reached():
+                logger.warning('Close invitation dialog timeout')
+                return False
+            self.click(self.C_INVITATION_CLOSE, interval=1)
 
     def update_state(self):
         res_bean = self.predict_bean(self.slave_state[0])
@@ -377,4 +413,3 @@ if __name__ == '__main__':
     # test_predict_res()
     test_predict_bean()
     # test_predict_buff()
-

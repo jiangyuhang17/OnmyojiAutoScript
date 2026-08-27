@@ -18,6 +18,7 @@ SUPPORTED_NAMES = {
     "kannazuki",
     "karuta",
     "kuzuha",
+    "longyin_suzuka_gozen",
     "longjue",
     "mengshan_shiro",
     "mengyin_kocho",

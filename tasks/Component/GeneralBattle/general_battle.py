@@ -15,6 +15,7 @@ from tasks.Component.GeneralBattle.assets import GeneralBattleAssets
 from tasks.Component.GeneralBattle.config_general_battle import GreenMarkType, GeneralBattleConfig
 from tasks.Component.GeneralBuff.config_buff import BuffClass
 from tasks.Component.GeneralBuff.general_buff import GeneralBuff
+from tasks.GameUi.assets import GameUiAssets
 
 from module.logger import logger
 
@@ -177,6 +178,8 @@ class GeneralBattle(GeneralBuff, GeneralBattleAssets):
             if self.appear_then_click(self.I_PREPARE_HIGHLIGHT, interval=1):
                 logger.info("Retry entering battle from preparation page")
                 continue
+            if self._ensure_battle_auto():
+                continue
             # 如果出现赢 就点击, 第二个是针对封魔的图片
             if self.appear(self.I_WIN, threshold=0.8) or self.appear(self.I_DE_WIN):
                 logger.info("Battle result is win")
@@ -270,6 +273,8 @@ class GeneralBattle(GeneralBuff, GeneralBattleAssets):
         logger.info("Start battle process")
         while 1:
             self.screenshot()
+            if self._ensure_battle_auto():
+                continue
             # 出现赢的鼓，点击直到消失
             if self.appear_then_click(self.I_WIN, interval=0.8):
                 continue
@@ -312,6 +317,13 @@ class GeneralBattle(GeneralBuff, GeneralBattleAssets):
             # 随机滑动
             if random_click_swipt_enable:
                 self.random_click_swipt()
+        return False
+
+    def _ensure_battle_auto(self) -> bool:
+        """Switch a running battle back to auto mode when it was toggled off."""
+        if self.ocr_appear_click(GameUiAssets.O_BATTLE_HAND, interval=2):
+            logger.warning("Battle is in manual mode, switched to auto")
+            return True
         return False
 
     def _hook_special_reward(self) -> bool:
