@@ -342,6 +342,16 @@ class ScriptTask(GameUi, GeneralBattle, DemonEncounterAssets, SwitchSoul):
             self.screenshot()
             if self.appear(self.I_JADE_50):
                 break
+            if self.is_in_prepare(False) or self.is_in_real_battle(False):
+                logger.warning('Lantern was classified as box but entered battle, correcting')
+                if self.run_general_battle():
+                    logger.info('Battle End')
+                return
+            # A teammate may start a battle while the lantern is being opened.
+            # Do not keep clicking the old map coordinate during the transition.
+            if not self.appear(self.I_DE_LOCATION):
+                time.sleep(0.5)
+                continue
             if self.click(target_click, interval=1):
                 continue
         while 1:

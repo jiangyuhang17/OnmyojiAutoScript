@@ -296,7 +296,10 @@ class ScriptTask(GameUi, GeneralInvite, GeneralRoom, BondlingBattle, SwitchSoul,
                         else:
                             break  # 时间到了或次数到了直接退出
                     else:
-                        logger.info('No bondling stone, exit')
+                        if not bondling_config.bondling_stone_enable:
+                            logger.info('Bondling stone usage is disabled, exit')
+                        else:
+                            logger.info('Unable to use bondling stone, exit')
                         break
                 # 检查结契设置
                 if not capture_setting_checked:

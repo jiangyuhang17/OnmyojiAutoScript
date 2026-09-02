@@ -198,6 +198,9 @@ def retry(func):
 
 
 class NemuIpcImpl:
+    CALL_TIMEOUT = 0.15
+    CONNECTION_TIMEOUT = 3.0
+
     def __init__(self, nemu_folder: str, instance_id: int, display_id: int = 0):
         """
         Args:
@@ -300,9 +303,17 @@ class NemuIpcImpl:
             asyncio.TimeoutError: If function call timeout
         """
         func_wrapped = partial(func, *args, **kwargs)
-        # Increased timeout for slow PCs
-        # Default screenshot interval is 0.2s, so a 0.15s timeout would have a fast retry without extra time costs
-        result = await asyncio.wait_for(self._ev.run_in_executor(None, func_wrapped), timeout=0.15)
+        # Initializing the IPC connection is much slower than a frame capture,
+        # especially while the emulator is loading a game scene.
+        timeout = (
+            self.CONNECTION_TIMEOUT
+            if func.__name__ in {'nemu_connect', 'nemu_disconnect'}
+            else self.CALL_TIMEOUT
+        )
+        result = await asyncio.wait_for(
+            self._ev.run_in_executor(None, func_wrapped),
+            timeout=timeout,
+        )
         return result
 
     def ev_run_sync(self, func, *args, **kwargs):
@@ -467,7 +478,7 @@ class NemuIpc():
                         instance_id=index,
                         display_id=0
                     ).__enter__()
-                except (NemuIpcIncompatible, NemuIpcError) as e:
+                except (asyncio.TimeoutError, NemuIpcIncompatible, NemuIpcError) as e:
                     logger.error(e)
                     logger.error('Emulator info incorrect')
 
@@ -483,7 +494,7 @@ class NemuIpc():
                 instance_id=self.emulator_instance.MuMuPlayer12_id,
                 display_id=0
             ).__enter__()
-        except (NemuIpcIncompatible, NemuIpcError) as e:
+        except (asyncio.TimeoutError, NemuIpcIncompatible, NemuIpcError) as e:
             logger.error(e)
             logger.error('Unable to initialize NemuIpc')
             raise RequestHumanTakeover

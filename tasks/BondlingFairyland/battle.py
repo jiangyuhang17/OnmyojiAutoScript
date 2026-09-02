@@ -73,6 +73,11 @@ class BondlingBattle(GeneralBattle, BondlingFairylandAssets):
             if cap_cnt >= max_cap:
                 cap_again = False
             self.screenshot()
+            # A failed catch can return straight to the team room without
+            # showing either the failure or reward settlement page.
+            if self.appear(self.I_GI_IN_ROOM) or self.is_in_room(False):
+                logger.info("Battle failed without settlement, returned to room")
+                return False
             # 如果捕获成功
             if self.appear_then_click(self.I_CAP_SUCCESS, action=self.C_CAP_SUCCESS,  interval=1):
                 win = True
