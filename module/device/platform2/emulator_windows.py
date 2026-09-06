@@ -319,7 +319,7 @@ class Emulator(EmulatorBase):
                             name=name,
                             path=self.path,
                         )
-                        if instance.MuMuPlayer12_id:
+                        if instance.MuMuPlayer12_id is not None:
                             instance.serial = f'127.0.0.1:{16384 + 32 * instance.MuMuPlayer12_id}'
                             yield instance
         elif self == Emulator.MEmuPlayer:

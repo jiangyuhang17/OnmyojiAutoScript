@@ -97,20 +97,37 @@ class EmulatorInstanceBase:
     @cached_property
     def MuMuPlayer12_id(self):
         """
-        Convert MuMu 12 instance name to instance id.
+        Convert a MuMu instance name to instance id.
         Example names:
             MuMuPlayer-12.0-3
+            MuMuPlayer-15.0-3
             YXArkNights-12.0-1
 
         Returns:
             int: Instance ID, or None if this is not a MuMu 12 instance
         """
-        res = re.search(r'MuMuPlayer(?:Global)?-12.0-(\d+)', self.name)
+        res = re.search(r'MuMuPlayer(?:Global)?-\d+(?:\.\d+)?-(\d+)$', self.name)
         if res:
             return int(res.group(1))
         res = re.search(r'YXArkNights-12.0-(\d+)', self.name)
         if res:
             return int(res.group(1))
+
+        return None
+
+    @cached_property
+    def MuMuPlayer_version(self):
+        """
+        Get the Android engine version from a MuMu instance name.
+
+        Returns:
+            int: 12 or 15, or None if the name is not a supported MuMu instance
+        """
+        res = re.search(r'MuMuPlayer(?:Global)?-(\d+)(?:\.\d+)?-\d+$', self.name)
+        if res:
+            return int(res.group(1))
+        if re.search(r'YXArkNights-12\.0-\d+$', self.name):
+            return 12
 
         return None
 

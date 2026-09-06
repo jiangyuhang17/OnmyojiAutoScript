@@ -335,6 +335,7 @@ def retry(func):
             self (Minitouch):
         """
         init = None
+        minitouch_empty_count = 0
         for _ in range(RETRY_TRIES):
             try:
                 if callable(init):
@@ -359,8 +360,15 @@ def retry(func):
             # MinitouchNotInstalledError: Received empty data from minitouch
             except MinitouchNotInstalledError as e:
                 logger.error(e)
+                minitouch_empty_count += 1
 
-                def init():
+                def init(restart_emulator=minitouch_empty_count >= 2):
+                    if restart_emulator and self.emulator_recover(
+                            f'Minitouch returned empty data {minitouch_empty_count} times'):
+                        if self._minitouch_port:
+                            self.adb_forward_remove(f'tcp:{self._minitouch_port}')
+                        del_cached_property(self, 'minitouch_builder')
+                        return
                     self.install_uiautomator2()
                     if self._minitouch_port:
                         self.adb_forward_remove(f'tcp:{self._minitouch_port}')
@@ -377,8 +385,8 @@ def retry(func):
             # AdbError
             except AdbError as e:
                 if handle_adb_error(e):
-                    def init():
-                        self.adb_reconnect()
+                    def init(error=e):
+                        self.adb_recover(error)
                 else:
                     break
             except BrokenPipeError as e:

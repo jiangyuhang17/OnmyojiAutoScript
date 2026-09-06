@@ -52,8 +52,8 @@ def retry(func):
             # AdbError
             except AdbError as e:
                 if handle_adb_error(e):
-                    def init():
-                        self.adb_reconnect()
+                    def init(error=e):
+                        self.adb_recover(error)
                 else:
                     break
             # Unknown, probably a trucked image

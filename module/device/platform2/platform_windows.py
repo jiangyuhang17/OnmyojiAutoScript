@@ -1,4 +1,6 @@
 import ctypes
+import json
+import os
 import re
 import subprocess
 import psutil
@@ -96,6 +98,26 @@ def get_window_title(hwnd):
     return string_buffer.value
 
 
+def find_visible_window_by_pid(pid):
+    """Return a visible top-level window owned by ``pid``, if any."""
+    target = int(pid)
+    found = []
+
+    def callback(hwnd, _):
+        process_id = wintypes.DWORD()
+        ctypes.windll.user32.GetWindowThreadProcessId(
+            hwnd, ctypes.byref(process_id)
+        )
+        if process_id.value == target and ctypes.windll.user32.IsWindowVisible(hwnd):
+            found.append(hwnd)
+            return False
+        return True
+
+    enum_proc = ctypes.WINFUNCTYPE(ctypes.c_bool, wintypes.HWND, wintypes.LPARAM)
+    ctypes.windll.user32.EnumWindows(enum_proc(callback), 0)
+    return found[0] if found else 0
+
+
 def flash_window(hwnd, flash=True):
     ctypes.windll.user32.FlashWindow(hwnd, flash)
 
@@ -164,10 +186,99 @@ class PlatformWindows(PlatformBase, EmulatorManager):
 
         return count
 
+    @staticmethod
+    def _mumu_nx_info(manager: str, instance_id: int) -> dict:
+        """Return MuMu Nx instance state, or an empty dict if it is unavailable."""
+        try:
+            result = subprocess.run(
+                [manager, 'info', '-v', str(instance_id)],
+                capture_output=True,
+                text=True,
+                timeout=5,
+            )
+            if result.returncode == 0:
+                return json.loads(result.stdout)
+        except (OSError, subprocess.SubprocessError, json.JSONDecodeError) as e:
+            logger.warning(f'Failed to query MuMu instance {instance_id}: {e}')
+        return {}
+
+    @staticmethod
+    def _mumu_nx_force_stop(instance: EmulatorInstance, info: dict):
+        """Force-stop exactly one MuMu Nx instance by its process command line."""
+        instance_id = instance.MuMuPlayer12_id
+        version = instance.MuMuPlayer_version
+        if info and (str(info.get('index')) != str(instance_id)
+                     or str(info.get('android_version', '')).split('.')[0] != str(version)):
+            raise EmulatorUnknown(
+                f'Refuse to force-stop MuMu instance: unexpected instance info {info}'
+            )
+
+        try:
+            def is_target(process):
+                return process.name().lower() == 'mumunxdevice.exe' \
+                    and instance.name in process.cmdline()
+
+            process = None
+            manager_pid = info.get('pid') if info else None
+            if manager_pid:
+                try:
+                    candidate = psutil.Process(int(manager_pid))
+                    if is_target(candidate):
+                        process = candidate
+                    else:
+                        logger.warning(
+                            f'MuMuManager returned stale PID {manager_pid} for {instance.name}'
+                        )
+                except psutil.NoSuchProcess:
+                    logger.warning(
+                        f'MuMuManager returned missing PID {manager_pid} for {instance.name}'
+                    )
+
+            # MuMuManager can return a stale PID when its RPC state is wedged.
+            # Locate the VM by the OS process command line in that case.
+            if process is None:
+                matches = []
+                for candidate in psutil.process_iter():
+                    try:
+                        if is_target(candidate):
+                            matches.append(candidate)
+                    except (psutil.NoSuchProcess, psutil.AccessDenied):
+                        continue
+                if not matches:
+                    logger.info(f'MuMu instance {instance.name} is already stopped')
+                    return
+                if len(matches) > 1:
+                    raise EmulatorUnknown(
+                        f'Refuse to force-stop {instance.name}: '
+                        f'multiple PIDs {[candidate.pid for candidate in matches]} matched'
+                    )
+                process = matches[0]
+
+            logger.warning(
+                f'Force-stop MuMu Android {version} instance {instance_id}, PID {process.pid}'
+            )
+            # Killing MuMuNxDevice itself tears down its Windows job and child
+            # processes. Do not enumerate children here: short-lived CEF/crashpad
+            # processes can disappear during recursive enumeration and prevent the
+            # actual emulator process from being killed.
+            try:
+                process.kill()
+                process.wait(timeout=10)
+            except psutil.NoSuchProcess:
+                pass
+            except psutil.TimeoutExpired as e:
+                raise EmulatorUnknown(
+                    f'Failed to force-stop MuMu instance {instance_id}: '
+                    f'PID {process.pid} is still running'
+                ) from e
+        except (KeyError, TypeError, ValueError, psutil.Error) as e:
+            raise EmulatorUnknown(f'Failed to force-stop MuMu instance {instance_id}: {e}') from e
+
     def _emulator_start(self, instance: EmulatorInstance):
         """
         Start a emulator without error handling
         """
+        self._emulator_start_process_pid = 0
         show_window=not self.config.script.device.emulator_window_minimize and not self.config.script.device.run_background_only
         exe: str = instance.emulator.path
         if instance == Emulator.MuMuPlayer:
@@ -177,10 +288,27 @@ class PlatformWindows(PlatformBase, EmulatorManager):
             # NemuPlayer.exe -m nemu-12.0-x64-default
             self.execute(f'"{exe}" -m {instance.name}', show_window=show_window)
         elif instance == Emulator.MuMuPlayer12:
-            # MuMuPlayer.exe -v 0
-            if instance.MuMuPlayer12_id is None:
-                logger.warning(f'Cannot get MuMu instance index from name {instance.name}')
-            self.execute(f'"{exe}" -v {instance.MuMuPlayer12_id}', show_window=show_window)
+            instance_id = instance.MuMuPlayer12_id
+            if instance_id is None:
+                raise EmulatorUnknown(f'Cannot get MuMu instance index from name {instance.name}')
+            if 'MuMuNxMain.exe' in exe:
+                version = instance.MuMuPlayer_version
+                if version is None:
+                    raise EmulatorUnknown(f'Cannot get MuMu Android version from name {instance.name}')
+                root = os.path.dirname(os.path.dirname(exe))
+                device_exe = os.path.join(
+                    root, 'nx_device', f'{version}.0', 'shell', 'MuMuNxDevice.exe'
+                ).replace('\\', '/')
+                if not os.path.exists(device_exe):
+                    raise EmulatorUnknown(f'MuMu device executable not found: {device_exe}')
+                process = self.execute(
+                    f'"{device_exe}" -v {instance_id} --vm {instance.name}',
+                    show_window=show_window,
+                )
+                self._emulator_start_process_pid = process.pid
+            else:
+                # MuMu Player 12 legacy launcher
+                self.execute(f'"{exe}" -v {instance_id}', show_window=show_window)
         elif instance == Emulator.LDPlayerFamily:
             # ldconsole.exe launch --index 0
             self.execute(f'"{Emulator.single_to_console(exe)}" launch --index {instance.LDPlayer_id}', show_window=show_window)
@@ -233,10 +361,19 @@ class PlatformWindows(PlatformBase, EmulatorManager):
                 rf')'
             )
         elif instance == Emulator.MuMuPlayer12:
-            # MuMuManager.exe api -v 1 shutdown_player
-            if instance.MuMuPlayer12_id is None:
-                logger.warning(f'Cannot get MuMu instance index from name {instance.name}')
-            self.execute(f'"{Emulator.single_to_console(exe)}" api -v {instance.MuMuPlayer12_id} shutdown_player')
+            instance_id = instance.MuMuPlayer12_id
+            if instance_id is None:
+                raise EmulatorUnknown(f'Cannot get MuMu instance index from name {instance.name}')
+            manager = Emulator.single_to_console(exe)
+            if 'MuMuNxMain.exe' in exe:
+                version = instance.MuMuPlayer_version
+                if version is None:
+                    raise EmulatorUnknown(f'Cannot get MuMu Android version from name {instance.name}')
+                info = self._mumu_nx_info(manager, instance_id)
+                self._mumu_nx_force_stop(instance, info)
+            else:
+                # MuMu Player 12 legacy manager
+                self.execute(f'"{manager}" api -v {instance_id} shutdown_player')
         elif instance == Emulator.LDPlayerFamily:
             # ldconsole.exe quit --index 0
             self.execute(f'"{Emulator.single_to_console(exe)}" quit --index {instance.LDPlayer_id}')
@@ -325,6 +462,18 @@ class PlatformWindows(PlatformBase, EmulatorManager):
         timeout = Timer(120).start()
         struct_window = Timer(10)
         new_window = 0
+        start_process_pid = getattr(self, '_emulator_start_process_pid', 0)
+        visible_window_required = bool(start_process_pid) \
+            and not self.config.script.device.emulator_window_minimize \
+            and not self.config.script.device.run_background_only
+
+        @run_once
+        def show_instance_window(hwnd):
+            logger.info(
+                f'Emulator visible window: {hwnd}, '
+                f'title={get_window_title(hwnd)!r}'
+            )
+
         while 1:
             interval.wait()
             interval.reset()
@@ -334,7 +483,12 @@ class PlatformWindows(PlatformBase, EmulatorManager):
 
             # Check emulator window showing up
             # logger.info([get_focused_window(), get_window_title(get_focused_window())])
-            if current_window != 0 and new_window == 0:
+            if start_process_pid:
+                instance_window = find_visible_window_by_pid(start_process_pid)
+                if instance_window:
+                    new_window = instance_window
+                    show_instance_window(instance_window)
+            elif current_window != 0 and new_window == 0:
                 new_window = get_focused_window()
                 if current_window != new_window and not self.config.script.device.emulator_window_minimize and not self.config.script.device.run_background_only:
                     logger.info(f'New window showing up: {new_window}, focus back')
@@ -382,6 +536,8 @@ class PlatformWindows(PlatformBase, EmulatorManager):
             show_package(packages)
 
             # Check Window structure
+            if visible_window_required and new_window == 0:
+                continue
             if not struct_window.started():
                 struct_window.start()
             elif struct_window.reached():

@@ -51,15 +51,15 @@ def retry(func):
             # AdbError
             except AdbError as e:
                 if handle_adb_error(e):
-                    def init():
-                        self.adb_reconnect()
+                    def init(error=e):
+                        self.adb_recover(error)
                 else:
                     break
             # RuntimeError: USB device 127.0.0.1:5555 is offline
             except RuntimeError as e:
                 if handle_adb_error(e):
-                    def init():
-                        self.adb_reconnect()
+                    def init(error=e):
+                        self.adb_recover(error)
                 else:
                     break
             # In `assert c.read string(4) == _OKAY`

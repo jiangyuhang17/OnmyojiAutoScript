@@ -51,8 +51,8 @@ def retry(func):
             # AdbError
             except AdbError as e:
                 if handle_adb_error(e):
-                    def init():
-                        self.adb_reconnect()
+                    def init(error=e):
+                        self.adb_recover(error)
                 else:
                     break
             # Package not installed
@@ -598,6 +598,25 @@ class Connection(ConnectionAttr):
         del_cached_property(self, 'adb_client')
         _ = self.adb_client
 
+    def adb_recover(self, error):
+        """Recover ADB, restarting a local emulator on an ADB read timeout."""
+        message = str(error).lower()
+        if 'adb read timeout' in message:
+            if self.emulator_recover('ADB read timed out'):
+                return
+
+        self.adb_reconnect()
+
+    def emulator_recover(self, reason):
+        """Force-restart a local emulator and report whether it recovered."""
+        if not self.is_emulator or self.is_over_http:
+            return False
+        logger.warning(f'{reason}, force restart local emulator immediately')
+        if self.emulator_start():
+            return True
+        logger.error(f'Failed to restart emulator: {reason}')
+        return False
+
     @Config.when(DEVICE_OVER_HTTP=False)
     def adb_reconnect(self):
         """
@@ -808,6 +827,14 @@ class Connection(ConnectionAttr):
                     logger.info(f'Current serial {self.serial} not found but paired device {emu_serial} found. '
                                 f'Using serial: {emu_serial}')
                     self.serial = emu_serial
+
+        # An offline emulator can remain in the ADB device list indefinitely.
+        # Treat it the same as a stopped emulator so Device.__init__ can restart
+        # the matching emulator instance instead of repeatedly reconnecting ADB.
+        current = devices.select(serial=self.serial).first_or_none()
+        if current is not None and current.status == 'offline':
+            logger.warning(f'Device {self.serial} is offline, restart emulator')
+            raise EmulatorNotRunningError
 
     @retry
     def list_package(self, show_log=True):
