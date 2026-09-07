@@ -162,6 +162,7 @@ class ScriptTask(GameUi, GeneralBattle, HeroTestAssets, SwitchSoul):
             self.I_HERO2_SKILL4,  # 叠辉祝福
             self.I_HERO2_SKILL5,  # 敛神祝福
             self.I_HERO2_SKILL6,  # 速度祝福
+            self.I_HERO2_SKILL7,  # 默认技能，选择第一个祝福
         ]
         # TODO: PVP
         pvp_skill = []
@@ -171,10 +172,19 @@ class ScriptTask(GameUi, GeneralBattle, HeroTestAssets, SwitchSoul):
         }
         target_skills = target_skill_dict[self.conf.herotest.skill_mode]
         timer = Timer(10).start()
+        retry_count = 0
         while True:
             self.screenshot()
             if timer.reached_and_reset():
                 if self.appear(self.I_BCMJ_SKILL_ADD_CONFIRM):
+                    retry_count += 1
+                    if retry_count >= 3:
+                        logger.warning(
+                            'No known skill selected after 3 retries, '
+                            'selecting the default skill'
+                        )
+                        self.click(self.I_HERO2_SKILL7)
+                        break
                     logger.warning('No skill selected for 10s, panel still open, retrying')
                     continue
                 logger.warning('Skill selection panel closed unexpectedly, exit')

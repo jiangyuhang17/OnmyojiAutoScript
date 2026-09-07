@@ -304,5 +304,14 @@
     "method": "Template matching",
     "threshold": 0.8,
     "description": "真钱"
+  },
+  {
+    "itemName": "hero2_skill7",
+    "imageName": "as_hero2_skill7.png",
+    "roiFront": "253,128,39,63",
+    "roiBack": "253,128,39,63",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "默认技能"
   }
 ]

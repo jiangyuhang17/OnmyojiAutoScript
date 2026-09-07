@@ -99,6 +99,8 @@ class HeroTestAssets:
 	I_HERO2_SKILL3 = RuleImage(roi_front=(520,358,62,38), roi_back=(41,346,1172,63), threshold=0.8, method="Template matching", file="./tasks/HeroTest/as/as_hero2_skill3.png")
 	# 速度祝福 
 	I_HERO2_SKILL6 = RuleImage(roi_front=(427,356,62,38), roi_back=(48,342,1175,67), threshold=0.8, method="Template matching", file="./tasks/HeroTest/as/as_hero2_skill6.png")
+	# 默认技能
+	I_HERO2_SKILL7 = RuleImage(roi_front=(253,128,39,63), roi_back=(253,128,39,63), threshold=0.8, method="Template matching", file="./tasks/HeroTest/as/as_hero2_skill7.png")
 
 
 	# Ocr Rule Assets
@@ -110,5 +112,4 @@ class HeroTestAssets:
 	O_ART_WAR_CARD_PLUS = RuleOcr(roi=(916,25,90,29), area=(916,25,90,29), mode="Digit", method="Default", keyword="", name="art_war_card_plus")
 	# 挑战按钮 
 	O_FIRE = RuleOcr(roi=(1130,585,92,55), area=(1126,576,100,99), mode="Single", method="Default", keyword="挑战", name="fire")
-
 
