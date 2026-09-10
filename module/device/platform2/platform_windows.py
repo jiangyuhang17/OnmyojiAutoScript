@@ -306,6 +306,12 @@ class PlatformWindows(PlatformBase, EmulatorManager):
                     show_window=show_window,
                 )
                 self._emulator_start_process_pid = process.pid
+            elif re.search(r'MuMuPlayer(?:Global)?-15\.0-\d+', instance.name):
+                manager = Emulator.single_to_console(exe)
+                self.execute(
+                    f'"{manager}" control -v {instance_id} --version 15 launch',
+                    show_window=show_window,
+                )
             else:
                 # MuMu Player 12 legacy launcher
                 self.execute(f'"{exe}" -v {instance_id}', show_window=show_window)
@@ -371,6 +377,11 @@ class PlatformWindows(PlatformBase, EmulatorManager):
                     raise EmulatorUnknown(f'Cannot get MuMu Android version from name {instance.name}')
                 info = self._mumu_nx_info(manager, instance_id)
                 self._mumu_nx_force_stop(instance, info)
+            elif re.search(r'MuMuPlayer(?:Global)?-15\.0-\d+', instance.name):
+                # Finish shutdown before emulator_start() launches the same instance.
+                self.execute(
+                    f'"{manager}" control -v {instance_id} --version 15 shutdown'
+                ).wait(timeout=30)
             else:
                 # MuMu Player 12 legacy manager
                 self.execute(f'"{manager}" api -v {instance_id} shutdown_player')

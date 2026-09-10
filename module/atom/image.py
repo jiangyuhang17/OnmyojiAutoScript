@@ -155,8 +155,8 @@ class RuleImage(RuleImageMallResourceMixin):
         mat = self.image
 
         if mat is None or mat.size == 0:
-            logger.error("Template image is invalid")
-            return False  # 模板无效，匹配失败
+            logger.error(f"Template image is invalid: {getattr(mat, 'shape', None)}")
+            return False  # 模板无效, 匹配失败
 
         if source is None or source.size == 0 \
                 or source.shape[0] < mat.shape[0] or source.shape[1] < mat.shape[1]:
@@ -222,6 +222,9 @@ class RuleImage(RuleImageMallResourceMixin):
 
             # 跳过无效缩放
             if scaled_w < 10 or scaled_h < 10:
+                continue
+            # 缩放后仍大于源图则跳过该尺度(避免 matchTemplate 契约问题)
+            if scaled_w > source_w or scaled_h > source_h:
                 continue
 
             try:
