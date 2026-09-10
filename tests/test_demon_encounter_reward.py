@@ -42,6 +42,48 @@ class DemonEncounterRewardTest(unittest.TestCase):
         task.run_general_battle.assert_called_once_with()
         task.click.assert_not_called()
 
+    def test_find_boss_reselects_after_center_click(self):
+        class BossMapRefreshed(Exception):
+            pass
+
+        class DisabledBestBossConfig:
+            def __getattr__(self, name):
+                return False
+
+        task = ScriptTask.__new__(ScriptTask)
+        task.conf = SimpleNamespace(best_demon_boss_config=DisabledBestBossConfig())
+        task.device = Mock()
+        task.screenshot = Mock()
+        task._clear_pending_battle_reward = Mock(return_value=False)
+
+        boss_select_checks = 0
+        center_clicks = 0
+
+        def appear(target):
+            nonlocal boss_select_checks
+            if target is task.I_DE_BOSS:
+                boss_select_checks += 1
+                if boss_select_checks == 2:
+                    raise BossMapRefreshed
+                return True
+            return False
+
+        def click(target, interval):
+            nonlocal center_clicks
+            if target is task.C_DM_BOSS_CLICK:
+                center_clicks += 1
+                self.assertEqual(center_clicks, 1)
+            return True
+
+        task.appear = appear
+        task.click = click
+
+        with self.assertRaises(BossMapRefreshed):
+            task.execute_boss()
+
+        self.assertEqual(boss_select_checks, 2)
+        self.assertEqual(center_clicks, 1)
+
 
 if __name__ == '__main__':
     unittest.main()

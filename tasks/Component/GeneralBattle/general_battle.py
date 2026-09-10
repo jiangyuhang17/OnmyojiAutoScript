@@ -7,6 +7,7 @@ from time import sleep
 
 import cv2
 from module.base.timer import Timer
+from module.exception import GameNotRunningError
 
 from module.base.utils import get_color, color_similar
 from tasks.base_task import BaseTask
@@ -322,7 +323,30 @@ class GeneralBattle(BattleWait, GeneralBuff, GeneralBattleAssets):
 
     def _ensure_battle_auto(self) -> bool:
         """Switch a running battle back to auto mode when it was toggled off."""
-        if self.ocr_appear_click(GameUiAssets.O_BATTLE_HAND, interval=2):
+        check_timer = getattr(self, '_battle_auto_check_timer', None)
+        if check_timer is not None and not check_timer.reached():
+            return False
+        if check_timer is None:
+            self._battle_auto_check_timer = Timer(2).start()
+        else:
+            check_timer.reset()
+
+        battle_mode = GameUiAssets.O_BATTLE_HAND.ocr(self.device.image)
+        if battle_mode:
+            self._battle_mode_missing_timer = None
+        else:
+            missing_timer = getattr(self, '_battle_mode_missing_timer', None)
+            if missing_timer is None:
+                self._battle_mode_missing_timer = Timer(15).start()
+            elif missing_timer.reached():
+                missing_timer.reset()
+                if not self.device.app_is_running():
+                    raise GameNotRunningError('Game stopped during battle')
+            return False
+
+        if battle_mode == GameUiAssets.O_BATTLE_HAND.keyword:
+            x, y = GameUiAssets.O_BATTLE_HAND.coord()
+            self.device.click(x=x, y=y, control_name=GameUiAssets.O_BATTLE_HAND.name)
             logger.warning("Battle is in manual mode, switched to auto")
             return True
         return False

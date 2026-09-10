@@ -95,6 +95,7 @@ class Connection(ConnectionAttr):
             config (AzurLaneConfig, str): Name of the user config under ./config
         """
         super().__init__(config)
+        self._emulator_error_restart_attempted = False
         if not self.is_over_http:
             self.detect_device()
 
@@ -404,11 +405,18 @@ class Connection(ConnectionAttr):
             logger.warning(str(output))
             raise AdbTimeout('reverse server accept timeout')
 
-        # Server receive data
-        data = recv_all(conn, chunk_size=chunk_size, recv_interval=0.001)
-
-        # Server close connection
-        conn.close()
+        # Server receive data. MuMu can leave this connection half-open after a
+        # VM restart, so always enforce a total timeout and close both sockets.
+        try:
+            data = recv_all(
+                conn,
+                chunk_size=chunk_size,
+                recv_interval=0.001,
+                timeout=timeout,
+            )
+        finally:
+            conn.close()
+            stream.close()
         return data
 
     def adb_exec_out(self, cmd, serial=None):
@@ -611,6 +619,20 @@ class Connection(ConnectionAttr):
         """Force-restart a local emulator and report whether it recovered."""
         if not self.is_emulator or self.is_over_http:
             return False
+        if getattr(self, '_emulator_error_restart_attempted', False):
+            logger.critical(
+                f'Emulator failed again after one automatic restart: {reason}'
+            )
+            logger.critical('Stop emulator and script; manual restart is required')
+            try:
+                self.emulator_stop()
+            except Exception as stop_error:
+                logger.exception(stop_error)
+            raise RequestHumanTakeover(
+                'Repeated emulator failure after automatic restart'
+            )
+
+        self._emulator_error_restart_attempted = True
         logger.warning(f'{reason}, force restart local emulator immediately')
         if self.emulator_start():
             return True

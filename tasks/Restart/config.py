@@ -36,6 +36,10 @@ class TasksReset(BaseModel):
 class LoginCharacterConfig(BaseModel):
     # 同账号同服务器多个角色时,需要登录的角色名/服务器名
     character: str = Field(default="")
+    auto_switch_enable: bool = Field(default=False, description='login_auto_switch_enable_help')
+    account: str = Field(default="", description='login_account_help')
+    server: str = Field(default="", description='login_server_help')
+    apple_or_android: bool = Field(default=True, description='apple_or_android_help')
 
 
 class Restart(ConfigBase):

@@ -58,7 +58,11 @@
       "enable_ap": true
     },
     "login_character_config": {
-      "character": ""
+      "character": "",
+      "auto_switch_enable": false,
+      "account": "",
+      "server": "",
+      "apple_or_android": true
     }
   },
   "global_game": {

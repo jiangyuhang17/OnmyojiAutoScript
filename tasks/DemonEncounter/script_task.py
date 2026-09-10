@@ -9,7 +9,7 @@ from cached_property import cached_property
 from datetime import datetime, timedelta
 
 from module.logger import logger
-from module.exception import TaskEnd
+from module.exception import GameNotRunningError, GameStuckError, TaskEnd
 from module.base.timer import Timer
 
 from tasks.Component.SwitchSoul.switch_soul import SwitchSoul
@@ -105,6 +105,7 @@ class ScriptTask(GameUi, GeneralBattle, DemonEncounterAssets, SwitchSoul):
                 if find_btn_clicked:
                     if self.click(self.C_DM_BOSS_CLICK, interval=5):
                         logger.info('Retry entering found boss...')
+                        find_btn_clicked = False
                     continue
                 if self.best_demon_enable:
                     self.device.click_record_clear()
@@ -179,23 +180,28 @@ class ScriptTask(GameUi, GeneralBattle, DemonEncounterAssets, SwitchSoul):
         # 延长时间并在战斗结束后改回来
         self.device.stuck_timer_long = Timer(480, count=480).start()
         preset_switched = False
+        transition_timer = Timer(180).start()
         while True:
             self.screenshot()
             if self.appear(self.I_BOSS_DONE_CHECK):
                 break
             if self.appear(self.I_BOSS_GATHER):
+                transition_timer.reset()
                 self.device.stuck_record_clear()
                 self.device.stuck_record_add('BATTLE_STATUS_S')
                 logger.info('Boss Gathering...')
                 sleep(2)
                 continue
             if self.appear(self.I_BOSS_WAIT):
+                transition_timer.reset()
                 logger.info('Boss battle failed, waiting for 2 seconds...')
                 sleep(2)
                 continue
             if self.appear(self.I_PREPARE_HIGHLIGHT) or self.is_in_real_battle(False):
+                transition_timer.reset()
                 if preset_switched:
                     self.run_general_battle()
+                    transition_timer.reset()
                     continue
                 preset_switched = True
                 # 逢魔其他战斗会影响current_count导致大于0
@@ -207,7 +213,12 @@ class ScriptTask(GameUi, GeneralBattle, DemonEncounterAssets, SwitchSoul):
                     general_battle_config = convert_to_general_battle_config(self.boss_type,
                                                                              demon_battle_conf=self.conf.demon_battle_config)
                 self.run_general_battle(config=general_battle_config)
+                transition_timer.reset()
                 continue
+            if not self.device.app_is_running():
+                raise GameNotRunningError('Game stopped while waiting for boss scene transition')
+            if transition_timer.reached():
+                raise GameStuckError('Boss scene transition timeout')
             logger.info('Waiting for boss scene transition...')
             sleep(2)
 

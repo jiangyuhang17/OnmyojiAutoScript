@@ -3,7 +3,7 @@ from types import SimpleNamespace
 from unittest.mock import Mock
 
 from module.device.connection import Connection
-from module.exception import EmulatorNotRunningError
+from module.exception import EmulatorNotRunningError, RequestHumanTakeover
 from module.map.map_grids import SelectedGrids
 
 
@@ -37,6 +37,7 @@ class DeviceConnectionTest(unittest.TestCase):
     def test_first_adb_read_timeout_restarts_local_emulator(self):
         connection = Connection.__new__(Connection)
         connection.serial = '127.0.0.1:16384'
+        connection._emulator_error_restart_attempted = False
         connection.adb_reconnect = Mock()
         connection.emulator_start = Mock(return_value=True)
 
@@ -44,6 +45,22 @@ class DeviceConnectionTest(unittest.TestCase):
 
         connection.adb_reconnect.assert_not_called()
         connection.emulator_start.assert_called_once_with()
+        self.assertTrue(connection._emulator_error_restart_attempted)
+
+    def test_second_emulator_failure_stops_without_restarting(self):
+        connection = Connection.__new__(Connection)
+        connection.serial = '127.0.0.1:16384'
+        connection._emulator_error_restart_attempted = True
+        connection.emulator_start = Mock(return_value=True)
+        connection.emulator_stop = Mock(return_value=True)
+
+        with self.assertRaisesRegex(
+                RequestHumanTakeover,
+                'Repeated emulator failure'):
+            connection.emulator_recover('ADB read timed out again')
+
+        connection.emulator_stop.assert_called_once_with()
+        connection.emulator_start.assert_not_called()
 
     def test_emulator_recover_rejects_network_device(self):
         connection = Connection.__new__(Connection)

@@ -1,5 +1,6 @@
 import random
 import re
+import select
 import socket
 import time
 
@@ -39,12 +40,13 @@ def random_port(port_range):
         return new_port
 
 
-def recv_all(stream, chunk_size=4096, recv_interval=0.000) -> bytes:
+def recv_all(stream, chunk_size=4096, recv_interval=0.000, timeout=10) -> bytes:
     """
     Args:
         stream:
         chunk_size:
         recv_interval (float): Default to 0.000, use 0.001 if receiving as server
+        timeout (float): Maximum seconds for the entire receive operation
 
     Returns:
         bytes:
@@ -54,14 +56,22 @@ def recv_all(stream, chunk_size=4096, recv_interval=0.000) -> bytes:
     """
     if isinstance(stream, _AdbStreamConnection):
         stream = stream.conn
-        stream.settimeout(10)
-    else:
-        stream.settimeout(10)
+    stream.setblocking(False)
 
     try:
         fragments = []
+        deadline = time.monotonic() + timeout
         while 1:
-            chunk = stream.recv(chunk_size)
+            remain = deadline - time.monotonic()
+            if remain <= 0:
+                raise AdbTimeout('adb read timeout')
+            readable, _, exceptional = select.select([stream], [], [stream], remain)
+            if exceptional or not readable:
+                raise AdbTimeout('adb read timeout')
+            try:
+                chunk = stream.recv(chunk_size)
+            except BlockingIOError:
+                continue
             if chunk:
                 fragments.append(chunk)
                 # See https://stackoverflow.com/questions/23837827/python-server-program-has-high-cpu-usage/41749820#41749820
@@ -69,7 +79,7 @@ def recv_all(stream, chunk_size=4096, recv_interval=0.000) -> bytes:
             else:
                 break
         return remove_shell_warning(b''.join(fragments))
-    except socket.timeout:
+    except (socket.timeout, TimeoutError):
         raise AdbTimeout('adb read timeout')
 
 

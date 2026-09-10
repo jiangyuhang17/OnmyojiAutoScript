@@ -117,6 +117,12 @@ class GameUi(BaseTask, GameUiAssets):
 
         timeout = Timer(10, count=20).start()
         loading_timeout = Timer(45).start()
+        battle_timeout = Timer(1800)
+
+        @run_once
+        def battle_check():
+            logger.warning('Battle is still running, wait before detecting UI page')
+
         while 1:
             self.maybe_screenshot(skip_first_screenshot)
             skip_first_screenshot = False
@@ -138,6 +144,22 @@ class GameUi(BaseTask, GameUiAssets):
                     logger.attr("UI", page.name)
                     self.ui_current = page
                     return page
+            # A process can be restarted while the game is still fighting.
+            # Wait for that battle instead of treating it as an unknown page
+            # and repeatedly clicking the battlefield.
+            if self.appear(GeneralBattleAssets.I_BATTLE_INFO):
+                battle_check()
+                if not battle_timeout.started():
+                    battle_timeout.start()
+                elif battle_timeout.reached():
+                    logger.warning('Wait for current battle timeout')
+                    break
+                timeout.reset()
+                self.device.click_record_clear()
+                self.device.stuck_timer.reset()
+                self.device.stuck_timer_long.reset()
+                sleep(1)
+                continue
             # Try to close unknown page
             if self.try_close_unknown_page():
                 timeout = Timer(10, count=20).start()

@@ -8,6 +8,8 @@
 其他实例排队等待。
 """
 import json
+import hashlib
+import re
 import threading
 from pathlib import Path
 from datetime import datetime
@@ -30,15 +32,22 @@ class _QueueState:
         }
     """
 
-    STATE_FILE = Path.cwd() / "log" / ".queue_state.json"
+    STATE_DIR = Path.cwd() / "log"
     STALE_TIMEOUT = 300  # 心跳超时 5 分钟，超过视为持有者崩溃
 
-    def __init__(self, config_name: str):
+    def __init__(self, config_name: str, resource_key: str = "global",
+                 state_dir: Path = None):
         """Args:
             config_name: 配置文件名称，如 'oas1'。
+            resource_key: 需要互斥使用的资源，例如模拟器实例名称。
         """
         self.config_name = config_name
-        self._lock = FileLock(str(self.STATE_FILE) + ".lock", timeout=5)
+        resource_key = str(resource_key or "global")
+        slug = re.sub(r'[^A-Za-z0-9_.-]+', '_', resource_key).strip('_.') or 'global'
+        digest = hashlib.sha1(resource_key.encode('utf-8')).hexdigest()[:10]
+        self.state_file = (Path(state_dir) if state_dir else self.STATE_DIR) / \
+            f".queue_state.{slug}.{digest}.json"
+        self._lock = FileLock(str(self.state_file) + ".lock", timeout=5)
 
     def read(self) -> dict:
         """读取状态文件。
@@ -48,10 +57,10 @@ class _QueueState:
         Returns:
             dict: 包含 current、timestamp、queue 的状态字典。
         """
-        if not self.STATE_FILE.exists():
+        if not self.state_file.exists():
             return {"current": None, "timestamp": None, "queue": []}
         try:
-            with open(self.STATE_FILE, "r", encoding="utf-8") as f:
+            with open(self.state_file, "r", encoding="utf-8") as f:
                 return json.load(f)
         except (json.JSONDecodeError, IOError):
             logger.warning("[InstanceGuard] State file corrupted, resetting")
@@ -59,8 +68,8 @@ class _QueueState:
 
     def write(self, state: dict) -> None:
         """写入状态文件。调用方需持有 _lock。"""
-        self.STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
-        with open(self.STATE_FILE, "w", encoding="utf-8") as f:
+        self.state_file.parent.mkdir(parents=True, exist_ok=True)
+        with open(self.state_file, "w", encoding="utf-8") as f:
             json.dump(state, f, indent=2, ensure_ascii=False)
 
     def is_stale(self, state: dict) -> bool:
@@ -100,7 +109,7 @@ class _Heartbeat:
     检测到丢失时设置 token_lost 标志通知主线程。
     """
 
-    INTERVAL = 180  # 心跳间隔 3 分钟，小于 STALE_TIMEOUT(5min) 留出缓冲
+    INTERVAL = 30  # 持有任务期间持续保活
 
     def __init__(self, config_name: str, state: _QueueState):
         self._config_name = config_name
@@ -165,13 +174,18 @@ class InstanceGuard:
             guard.release()
     """
 
-    def __init__(self, config_name: str):
+    def __init__(self, config_name: str, resource_key: str = "global",
+                 state_dir: Path = None):
         """Args:
             config_name: 配置文件名称。
+            resource_key: 共享资源名称。同一资源名称的实例互斥执行。
         """
         self.config_name = config_name
-        self._state = _QueueState(config_name)
+        self.resource_key = str(resource_key or "global")
+        self._state = _QueueState(config_name, self.resource_key, state_dir=state_dir)
         self._heartbeat = _Heartbeat(config_name, self._state)
+        self._owns_token = False
+        self.last_acquire_was_new = False
 
     @property
     def token_lost(self) -> bool:
@@ -195,9 +209,12 @@ class InstanceGuard:
         """
         with self._state._lock:
             state = self._state.read()
+            self.last_acquire_was_new = False
 
             # 自己已是持有者，刷新心跳
             if state["current"] == self.config_name:
+                self.last_acquire_was_new = not self._owns_token
+                self._owns_token = True
                 state["timestamp"] = datetime.now().isoformat()
                 self._state.write(state)
                 self._heartbeat.start()
@@ -219,8 +236,11 @@ class InstanceGuard:
                 if self.config_name in state["queue"]:
                     state["queue"].remove(self.config_name)
                 self._state.write(state)
+                self._owns_token = True
+                self.last_acquire_was_new = True
                 logger.info(
-                    f"[InstanceGuard] '{self.config_name}' acquired token")
+                    f"[InstanceGuard] '{self.config_name}' acquired token "
+                    f"for '{self.resource_key}'")
                 self._heartbeat.start()
                 return True
 
@@ -237,8 +257,7 @@ class InstanceGuard:
     def release(self) -> None:
         """释放执行权。
 
-        清空 current 和 timestamp，停止心跳。
-        等待队列中的实例自行获取。
+        停止心跳，并把执行权交给等待队列中的下一个实例。
         如果自己不是持有者，静默返回。
         """
         with self._state._lock:
@@ -247,10 +266,18 @@ class InstanceGuard:
                 return
 
             self._heartbeat.stop()
-            state["current"] = None
-            state["timestamp"] = None
+            self._owns_token = False
+            self.last_acquire_was_new = False
+            if state["queue"]:
+                state["current"] = state["queue"].pop(0)
+                state["timestamp"] = datetime.now().isoformat()
+            else:
+                state["current"] = None
+                state["timestamp"] = None
             self._state.write(state)
-            logger.info(f"[InstanceGuard] '{self.config_name}' released token")
+            logger.info(
+                f"[InstanceGuard] '{self.config_name}' released token "
+                f"for '{self.resource_key}', next: {state['current']}")
 
     def should_release(self, pending_task: list, waiting_task: list,
                        idle_threshold_minutes: int = 10) -> bool:
@@ -271,12 +298,7 @@ class InstanceGuard:
         """
         if pending_task:
             return False
-        if not waiting_task:
-            return True
-
-        next_task_time = waiting_task[0].next_run
-        idle_seconds = (next_task_time - datetime.now()).total_seconds()
-        return idle_seconds > idle_threshold_minutes * 60
+        return True
 
     def remove_from_queue(self) -> None:
         """从排队系统中完全移除自己。
@@ -294,6 +316,8 @@ class InstanceGuard:
 
             if state["current"] == self.config_name:
                 self._heartbeat.stop()
+                self._owns_token = False
+                self.last_acquire_was_new = False
                 if state["queue"]:
                     next_holder = state["queue"].pop(0)
                     state["current"] = next_holder

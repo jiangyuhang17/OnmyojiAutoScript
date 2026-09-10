@@ -1,5 +1,6 @@
 import math
 import time
+from difflib import SequenceMatcher
 
 import cv2
 from module.atom.click import RuleClick
@@ -14,6 +15,17 @@ from tasks.base_task import BaseTask
 
 class LoginAccount(BaseTask, SwitchAccountAssets):
 
+    @staticmethod
+    def server_name_matches(actual: str, expected: str) -> bool:
+        """Allow one-character OCR errors without accepting unrelated servers."""
+        actual = ''.join(str(actual or '').split())
+        expected = ''.join(str(expected or '').split())
+        if not actual or not expected:
+            return False
+        if actual == expected or actual in expected or expected in actual:
+            return True
+        return SequenceMatcher(None, actual, expected).ratio() >= 0.65
+
     def get_svr_name(self):
         self.screenshot()
         ocrRes = self.O_SA_LOGIN_FORM_SVR_NAME.ocr(self.device.image)
@@ -25,8 +37,9 @@ class LoginAccount(BaseTask, SwitchAccountAssets):
         @param svrName:
         @type svrName:
         """
-        self.O_SA_LOGIN_FORM_SVR_NAME.keyword = svrName
-        if self.ocr_appear(self.O_SA_LOGIN_FORM_SVR_NAME):
+        current_svr = self.get_svr_name()
+        if self.server_name_matches(current_svr, svrName):
+            logger.info("current server %s matches target %s", current_svr, svrName)
             return True
         self.ui_click(self.C_SA_LOGIN_FORM_SWITCH_SVR_BTN, self.I_SA_CHECK_SELECT_SVR_1, 1.5)
         # 展开底部角色列表,显示角色所属服务器
@@ -50,14 +63,12 @@ class LoginAccount(BaseTask, SwitchAccountAssets):
             self.device.image = cv2.cvtColor(self.device.image, cv2.COLOR_GRAY2RGB)
 
             ocrRes = self.O_SA_SELECT_SVR_SVR_LIST.detect_and_ocr(self.device.image)
-            # 受限于图像识别文字准确率,此处对识别结果与实际服务器名字 进行检查 字重合度大于阈值 就认为查找成功
-            thresh = 0.5
+            # 登录页文字较小，允许少量OCR误差，并兼容省略渠道前缀的服务器名。
             ocrSvrList = [res.ocr_text for res in ocrRes]
             for index, ocrSvrName in enumerate(ocrSvrList):
                 if len(ocrSvrName) < 3:
-                    break
-                tmp = set(svrName).intersection(set(ocrSvrName))
-                if len(tmp) > max(len(svrName), len(ocrSvrName)) * thresh:
+                    continue
+                if self.server_name_matches(ocrSvrName, svrName):
                     logger.info("found svr %s which is similar with %s", ocrSvrName, svrName)
                     found = True
                     # 确定点击位置
@@ -297,10 +308,14 @@ class LoginAccount(BaseTask, SwitchAccountAssets):
                     self.click(self.C_SA_LOGIN_FORM_USER_CENTER)
                     continue
 
-                # 已登录 查找对应角色
-                if not isCharacterSelected and self.switch_character(accountInfo.character):
-                    isCharacterSelected = True
-                    continue
+                # 已登录后优先按角色查找；未配置角色时直接按服务器切换。
+                if not isCharacterSelected:
+                    if accountInfo.character:
+                        isCharacterSelected = self.switch_character(accountInfo.character)
+                    elif accountInfo.svr:
+                        isCharacterSelected = self.switch_svr(accountInfo.svr)
+                    if isCharacterSelected:
+                        continue
                 break
             continue
 

@@ -8,6 +8,8 @@ from module.logger import logger
 from tasks.Restart.assets import RestartAssets
 from tasks.GameUi.assets import GameUiAssets
 from tasks.Component.GeneralBuff.assets import GeneralBuffAssets
+from tasks.Component.SwitchAccount.login_account import LoginAccount
+from tasks.Component.SwitchAccount.switch_account_config import AccountInfo
 from tasks.base_task import BaseTask
 import time
 
@@ -20,6 +22,42 @@ class LoginHandler(BaseTask, RestartAssets, GameUiAssets, GeneralBuffAssets):
         self.O_LOGIN_SPECIFIC_SERVE.keyword = self.character
         # self.specific_usr = kwargs['config'].
 
+    def _login_account_helper(self) -> LoginAccount:
+        return LoginAccount(config=self.config, device=self.device)
+
+    def _ensure_login_target(self) -> bool:
+        target = self.config.restart.login_character_config
+        if not target.auto_switch_enable or not target.server:
+            return True
+
+        helper = self._login_account_helper()
+        current_server = helper.get_svr_name()
+        logger.info('Login server check: current[%s], expected[%s]', current_server, target.server)
+        if helper.server_name_matches(current_server, target.server):
+            logger.info('Login account/server already matches configuration')
+            return True
+
+        logger.warning('Login server mismatch, switch account and server')
+        account_info = AccountInfo(
+            character=target.character,
+            svr=target.server,
+            account=target.account,
+            apple_or_android=target.apple_or_android,
+        )
+        if not helper.login(account_info):
+            logger.error('Unable to switch login target to account[%s] server[%s]',
+                         target.account, target.server)
+            return False
+
+        current_server = helper.get_svr_name()
+        if not helper.server_name_matches(current_server, target.server):
+            logger.error('Server switch verification failed: current[%s], expected[%s]',
+                         current_server, target.server)
+            return False
+        logger.info('Login target switched successfully: account[%s], server[%s]',
+                    target.account, target.server)
+        return True
+
     def _app_handle_login(self) -> bool:
         """
         最终是在庭院界面
@@ -31,6 +69,7 @@ class LoginHandler(BaseTask, RestartAssets, GameUiAssets, GeneralBuffAssets):
         confirm_timer = Timer(1.5, count=2).start()
         orientation_timer = Timer(10)
         login_success = False
+        login_target_checked = False
 
         while 1:
             # Watch device rotation
@@ -132,6 +171,14 @@ class LoginHandler(BaseTask, RestartAssets, GameUiAssets, GeneralBuffAssets):
                 
             # 点击’进入游戏‘
             if not self.appear(self.I_LOGIN_8):
+                continue
+
+            if not login_target_checked:
+                if not self._ensure_login_target():
+                    raise GameStuckError('Unable to switch to configured login account/server')
+                login_target_checked = True
+                # Account/server switching changes the whole login form. Refresh before entering.
+                self.screenshot()
                 continue
             
             # 登录体验服时，点击“进入游戏”速度过快，可能会出现体验服的弹窗

@@ -62,6 +62,7 @@ class Script:
         self.loop_thread: Thread = None
         # 跨进程排队管理器（仅在 queue_mode=True 时初始化）
         self.instance_guard: InstanceGuard = None
+        self._queue_owner_needs_restart = False
         self.anti_ban_guard: AntiBanGuard = AntiBanGuard()
 
     @cached_property
@@ -334,11 +335,11 @@ class Script:
             antiban_wake = self.anti_ban_guard.wake_time(now, self.config.script.anti_ban)
             if antiban_wake is not None:
                 task.next_run = max(task.next_run, antiban_wake)
-            if not self._try_acquire_queue_token():
-                del_cached_property(self, "config")
-                continue
             # 任务时间到了返回任务名称
             if task.next_run <= now:
+                if not self._try_acquire_queue_token():
+                    del_cached_property(self, "config")
+                    continue
                 return task.command
             # 根据策略执行等待逻辑
             if not self._handle_wait_during_idle(task.next_run):
@@ -360,41 +361,43 @@ class Script:
             if self.instance_guard:
                 self.instance_guard.remove_from_queue()
                 self.instance_guard = None
+            self._queue_owner_needs_restart = False
             return True
 
         # 懒加载instance_guard
         if self.instance_guard is None:
             try:
-                self.instance_guard = InstanceGuard(self.config_name)
-                logger.info(f"[Queue] Queue mode enabled for '{self.config_name}'")
+                device_config = self.config.script.device
+                resource_key = (device_config.emulatorinfo_name or
+                                device_config.serial or self.config_name)
+                self.instance_guard = InstanceGuard(
+                    self.config_name, resource_key=resource_key)
+                logger.info(
+                    f"[Queue] Queue mode enabled for '{self.config_name}', "
+                    f"emulator: '{resource_key}'")
             except Exception:
                 self.instance_guard = None
                 return True
 
         # 尝试获取执行权
         if self.instance_guard.try_acquire():
+            if self.instance_guard.last_acquire_was_new:
+                self._queue_owner_needs_restart = True
             return True
 
-        # 执行权获取失败，关闭模拟器并进入等待循环
+        # 执行权获取失败时只等待。关闭共享模拟器会中断当前持有者。
         logger.info(f"[Queue] '{self.config_name}' waiting for execution token...")
-        if (self.config.script.optimization.when_task_queue_empty == 'close_game'
-                and not self._emulator_down
-                and 'device' in self.__dict__):
-            try:
-                self.device.emulator_stop()
-                self._emulator_down = True
-                logger.info(f"[Queue] Emulator closed during queue wait")
-            except Exception:
-                pass
         self.config.start_watching()
         while True:
-            time.sleep(30)
+            time.sleep(10)
 
             if self.config.should_reload():
                 logger.info(f"[Queue] Config changed, re-evaluating")
                 return False
 
             if self.instance_guard.try_acquire():
+                if self.instance_guard.last_acquire_was_new:
+                    self._queue_owner_needs_restart = True
                 return True
 
     def _handle_wait_during_idle(self, next_run: datetime) -> bool:
@@ -404,6 +407,9 @@ class Script:
         :return: True 表示等待成功完成, False 表示等待被中断
         """
         method = self.config.script.optimization.when_task_queue_empty
+        if self.config.script.optimization.queue_mode:
+            logger.info('[Queue] Idle wait without touching the shared emulator')
+            return self.wait_until(next_run)
         strategy_map = {
             "close_game": self._wait_close_game,
             "goto_main": self._wait_goto_main,
@@ -620,6 +626,45 @@ class Script:
             self.config.notifier.push(title=f'{I18n.trans_zh_cn(command)}{command}', content=f"<{self.config_name}> Exception occured")
             exit(1)
 
+    def _prepare_scheduled_task(self, task: str) -> bool:
+        """Ensure the emulator and game are ready before a scheduled task starts."""
+        queue_owner_restarted = False
+        if getattr(self, '_queue_owner_needs_restart', False):
+            logger.info(
+                f"[Queue] '{self.config_name}' owns emulator "
+                f"'{self.instance_guard.resource_key}', restart before task `{task}`")
+            if not self.device.emulator_start():
+                raise RequestHumanTakeover('Failed to restart emulator after acquiring execution token')
+            self._queue_owner_needs_restart = False
+            self._emulator_down = False
+            queue_owner_restarted = True
+
+            # A non-Restart task still needs the normal app startup/login flow.
+            if task != 'Restart' and not self.run('Restart'):
+                return False
+
+        if self._emulator_down:
+            self.device = Device(self.config)
+            self._emulator_down = False
+        else:
+            _ = self.device
+
+        game_is_running = self.device.app_is_running()
+        if (self.is_first_task and task == 'Restart' and game_is_running
+                and not queue_owner_restarted):
+            logger.info('Skip task `Restart` at scheduler start: game is already running')
+            self.config.task_delay(task='Restart', success=True, server=True)
+            del_cached_property(self, 'config')
+            return False
+
+        if task != 'Restart' and not game_is_running:
+            logger.warning(f'Game is not running before task `{task}`, queue task `Restart` first')
+            self.config.task_call('Restart')
+            del_cached_property(self, 'config')
+            return False
+
+        return True
+
     def loop(self):
         """
         Main loop of scheduler.
@@ -667,18 +712,8 @@ class Script:
 
             # Get task
             task = self.get_next_task()
-            # Skip first restart
-            if self.is_first_task and task == 'Restart':
-                logger.info('Skip task `Restart` at scheduler start')
-                self.config.task_delay(task='Restart', success=True, server=True)
-                del_cached_property(self, 'config')
+            if not self._prepare_scheduled_task(task):
                 continue
-
-            if self._emulator_down:
-                self.device = Device(self.config)
-                self._emulator_down = False
-            else:
-                _ = self.device
 
             # Run
             logger.info(f'Scheduler: Start task `{task}`')
@@ -687,9 +722,13 @@ class Script:
             logger.hr(task, level=0)
             self.config.model.running_task = task
             _task_start = datetime.now()
-            success = self.run(inflection.camelize(task))
-            self.config.model.running_task = ''
-            logger.info(f'Scheduler: End task `{task}`')
+            try:
+                success = self.run(inflection.camelize(task))
+            finally:
+                self.config.model.running_task = ''
+                logger.info(f'Scheduler: End task `{task}`')
+                if self.instance_guard:
+                    self.instance_guard.release()
             self.is_first_task = False
             self.anti_ban_guard.record_active((datetime.now() - _task_start).total_seconds())
 
